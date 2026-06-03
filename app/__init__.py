@@ -33,6 +33,12 @@ def create_app(config_name='default'):
     login_manager.login_message = '请先登录！'
     login_manager.login_message_category = 'warning'
 
+    # Flask-Login 用户加载回调（必须！否则所有模板渲染均500错误）
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.models.user import User
+        return db.session.get(User, int(user_id))
+
     # -------------------------------------------------------
     # 注册蓝图（Blueprint）
     # 每个模块对应一个蓝图，便于分工开发
