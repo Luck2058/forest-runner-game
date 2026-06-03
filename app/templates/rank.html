@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}排行榜{% endblock %}
+
+{% block content %}
+<div class="rank-page">
+    <div class="page-header">
+        <h1>🏆 森林英雄榜</h1>
+        <p>跑得最远的森林冒险家</p>
+    </div>
+
+    <!-- 前三名特殊展示 -->
+    {% if scores|length >= 3 %}
+    <div class="top3-podium">
+        <!-- 第二名 -->
+        <div class="podium-item podium-2">
+            <div class="podium-avatar">🐰</div>
+            <div class="podium-name">{{ scores[1].username }}</div>
+            <div class="podium-score">{{ scores[1].score }}</div>
+            <div class="podium-block">🥈</div>
+        </div>
+        <!-- 第一名 -->
+        <div class="podium-item podium-1">
+            <div class="podium-crown">👑</div>
+            <div class="podium-avatar">🦊</div>
+            <div class="podium-name">{{ scores[0].username }}</div>
+            <div class="podium-score">{{ scores[0].score }}</div>
+            <div class="podium-block">🥇</div>
+        </div>
+        <!-- 第三名 -->
+        <div class="podium-item podium-3">
+            <div class="podium-avatar">🐻</div>
+            <div class="podium-name">{{ scores[2].username }}</div>
+            <div class="podium-score">{{ scores[2].score }}</div>
+            <div class="podium-block">🥉</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 完整排行榜表格 -->
+    <div class="rank-table-wrap">
+        <table class="rank-table">
+            <thead>
+                <tr>
+                    <th>名次</th>
+                    <th>玩家</th>
+                    <th>得分</th>
+                    <th>金币</th>
+                    <th>距离</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in scores %}
+                <tr class="{% if loop.index <= 3 %}top-row{% endif %}">
+                    <td class="rank-num">
+                        {% if loop.index == 1 %}🥇
+                        {% elif loop.index == 2 %}🥈
+                        {% elif loop.index == 3 %}🥉
+                        {% else %}{{ loop.index }}
+                        {% endif %}
+                    </td>
+                    <td class="rank-name">
+                        <span class="player-icon">🌲</span>{{ item.username }}
+                    </td>
+                    <td class="rank-score">{{ item.score }}</td>
+                    <td>💰 {{ item.coins }}</td>
+                    <td>{{ item.distance }}m</td>
+                </tr>
+                {% endfor %}
+
+                {% if not scores %}
+                <tr>
+                    <td colspan="5" class="empty-tip">
+                        🌿 还没有人上榜，快去创造记录吧！
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="rank-actions">
+        <a href="{{ url_for('game.game') }}" class="btn btn-start">🎮 去刷分</a>
+        <button class="btn btn-outline" onclick="location.reload()">🔄 刷新榜单</button>
+    </div>
+</div>
+{% endblock %}

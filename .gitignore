@@ -1,0 +1,62 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# ===== 虚拟环境（不上传到 GitHub）=====
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ===== 本地数据库文件（不上传）=====
+*.db
+*.sqlite
+*.sqlite3
+dev_forest.db
+
+# ===== Flask 实例目录 =====
+instance/
+
+# ===== 环境变量文件（含密码/密钥，绝对不上传）=====
+.env
+.env.local
+.env.*.local
+
+# ===== 编辑器配置 =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== macOS =====
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ===== Windows =====
+Thumbs.db
+Thumbs.db:encdata
+desktop.ini
+$RECYCLE.BIN/
+
+# ===== 日志文件 =====
+*.log
+logs/
+
+# ===== 分发/打包 =====
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# ===== pytest 缓存 =====
+.pytest_cache/
+.coverage
+htmlcov/

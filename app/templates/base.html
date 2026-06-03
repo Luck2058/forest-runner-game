@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}森林酷跑{% endblock %} - 森林酷跑游戏系统</title>
+
+    <!-- 引入 Google Fonts 卡通字体（可替换为本地字体） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+    <!-- 主样式文件 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ============ 顶部导航栏 ============ -->
+<nav class="navbar">
+    <div class="navbar-brand">
+        <span class="logo-icon">🌲</span>
+        <a href="{{ url_for('main.index') }}" class="brand-name">森林酷跑</a>
+    </div>
+
+    <div class="navbar-menu">
+        <a href="{{ url_for('main.index') }}" class="nav-link">🏠 首页</a>
+        <a href="{{ url_for('game.game') }}" class="nav-link">🎮 开始游戏</a>
+        <a href="{{ url_for('score.rank') }}" class="nav-link">🏆 排行榜</a>
+
+        {% if session.get('username') %}
+            <a href="{{ url_for('game.profile') }}" class="nav-link">👤 {{ session['username'] }}</a>
+            <a href="{{ url_for('auth.logout') }}" class="nav-link nav-logout">退出</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}" class="nav-link nav-btn">登录</a>
+            <a href="{{ url_for('auth.register') }}" class="nav-link nav-btn-outline">注册</a>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- ============ Flash 消息提示 ============ -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                    <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- ============ 页面内容区域 ============ -->
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ============ 底部 ============ -->
+<footer class="footer">
+    <p>🌲 森林酷跑游戏系统 · 期末综合训练项目 · 小组共同开发</p>
+</footer>
+
+<!-- 公共 JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

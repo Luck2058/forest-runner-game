@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}个人中心{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+
+    <!-- 用户卡片 -->
+    <div class="profile-card">
+        <div class="profile-avatar">🦊</div>
+        <div class="profile-info">
+            <h2 class="profile-name">{{ username }}</h2>
+            <p class="profile-tag">🌲 森林探险家</p>
+        </div>
+    </div>
+
+    <!-- 统计数据 -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-value" id="bestScore">-</div>
+            <div class="stat-label">最高分</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" id="totalCoins">-</div>
+            <div class="stat-label">累计金币</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎮</div>
+            <div class="stat-value" id="gameCount">-</div>
+            <div class="stat-label">游戏次数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📏</div>
+            <div class="stat-value" id="bestDist">-</div>
+            <div class="stat-label">最远距离</div>
+        </div>
+    </div>
+
+    <!-- 历史成绩列表 -->
+    <div class="history-section">
+        <h3>📋 历史成绩</h3>
+        <div id="scoreList" class="score-list">
+            <div class="loading-tip">⏳ 加载中...</div>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <a href="{{ url_for('game.game') }}" class="btn btn-start">🎮 再来一局</a>
+        <a href="{{ url_for('score.rank') }}" class="btn btn-rank">🏆 查看排行</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/rank.js') }}"></script>
+<script>
+// 页面加载时获取个人成绩
+window.addEventListener('DOMContentLoaded', function() {
+    loadMyScores();
+});
+
+function loadMyScores() {
+    fetch('/score/my-scores')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.scores.length > 0) {
+                const scores = data.scores;
+
+                // 更新统计
+                document.getElementById('bestScore').textContent = Math.max(...scores.map(s => s.score));
+                document.getElementById('totalCoins').textContent = scores.reduce((a, s) => a + s.coins, 0);
+                document.getElementById('gameCount').textContent = scores.length + ' 次';
+                document.getElementById('bestDist').textContent = Math.max(...scores.map(s => s.distance)) + 'm';
+
+                // 渲染历史列表
+                const listEl = document.getElementById('scoreList');
+                listEl.innerHTML = scores.map((s, i) => `
+                    <div class="score-item">
+                        <span class="score-rank">#${i + 1}</span>
+                        <span class="score-val">⭐ ${s.score}</span>
+                        <span>💰 ${s.coins}</span>
+                        <span>📏 ${s.distance}m</span>
+                        <span class="score-time">${s.create_time}</span>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('scoreList').innerHTML =
+                    '<div class="empty-tip">🌿 还没有成绩记录，快去游戏吧！</div>';
+                ['bestScore','totalCoins','gameCount','bestDist'].forEach(id => {
+                    document.getElementById(id).textContent = '0';
+                });
+            }
+        })
+        .catch(() => {
+            document.getElementById('scoreList').innerHTML =
+                '<div class="empty-tip">⚠️ 加载失败，请刷新重试</div>';
+        });
+}
+</script>
+{% endblock %}

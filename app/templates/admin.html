@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}后台管理{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+    <div class="admin-header">
+        <h1>⚙️ 管理后台</h1>
+        <p>森林酷跑系统管理中心</p>
+    </div>
+
+    <!-- 数据概览卡片 -->
+    <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="astat-icon">👥</div>
+            <div class="astat-value">{{ stats.user_count }}</div>
+            <div class="astat-label">注册用户</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="astat-icon">🎮</div>
+            <div class="astat-value">{{ stats.today_games }}</div>
+            <div class="astat-label">今日游戏次数</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="astat-icon">⭐</div>
+            <div class="astat-value">{{ stats.top_score }}</div>
+            <div class="astat-label">最高记录</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="astat-icon">📊</div>
+            <div class="astat-value">{{ stats.total_games }}</div>
+            <div class="astat-label">总游戏次数</div>
+        </div>
+    </div>
+
+    <!-- 管理功能区 -->
+    <div class="admin-panels">
+
+        <!-- 用户管理 -->
+        <div class="admin-panel">
+            <div class="panel-header">
+                <h3>👥 用户管理</h3>
+                <button class="btn btn-sm btn-outline">刷新</button>
+            </div>
+            <div class="panel-body">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>ID</th><th>用户名</th><th>昵称</th><th>注册时间</th><th>操作</th></tr>
+                    </thead>
+                    <tbody>
+                        <!-- TODO：成员三 —— 对接数据库查询用户列表 -->
+                        <tr><td>1</td><td>admin</td><td>管理员</td><td>2024-06-01</td><td><button class="btn-xs">详情</button></td></tr>
+                        <tr><td>2</td><td>player1</td><td>森林小熊</td><td>2024-06-01</td><td><button class="btn-xs">详情</button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 公告管理 -->
+        <div class="admin-panel">
+            <div class="panel-header">
+                <h3>📢 公告管理</h3>
+                <button class="btn btn-sm btn-primary" onclick="showNoticeForm()">+ 新增公告</button>
+            </div>
+            <div class="panel-body">
+                <!-- TODO：成员三 —— 对接数据库查询公告列表 -->
+                <div class="notice-item">
+                    <span class="notice-title">🌲 游戏正式上线！</span>
+                    <span class="notice-time">2024-06-01</span>
+                    <button class="btn-xs btn-danger">删除</button>
+                </div>
+                <div class="notice-form hidden" id="noticeForm">
+                    <input type="text" placeholder="公告标题" class="form-input">
+                    <textarea placeholder="公告内容" class="form-textarea"></textarea>
+                    <button class="btn btn-sm btn-primary">发布</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="admin-actions">
+        <a href="{{ url_for('score.rank') }}" class="btn btn-outline">🏆 查看排行榜</a>
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline">🏠 返回首页</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showNoticeForm() {
+    const form = document.getElementById('noticeForm');
+    form.classList.toggle('hidden');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}登录{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <!-- 装饰元素 -->
+    <div class="forest-deco">🌳🦊🌿🍃🌲</div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">🌲</div>
+            <h2>欢迎回来！</h2>
+            <p>登录后开始你的森林冒险</p>
+        </div>
+
+        <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+
+            <div class="form-group">
+                <label for="username">
+                    <span class="form-icon">👤</span> 用户名
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="请输入用户名"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <span class="form-icon">🔒</span> 密码
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="请输入密码"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                🚀 进入森林
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>还没有账号？ <a href="{{ url_for('auth.register') }}">立即注册</a></p>
+            <p class="demo-hint">💡 演示版：任意输入用户名密码即可登录</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

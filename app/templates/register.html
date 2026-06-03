@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}注册{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="forest-deco">🐰🌸🍀🦋🌼</div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">🦊</div>
+            <h2>加入森林冒险！</h2>
+            <p>创建你的专属角色，开始奔跑吧</p>
+        </div>
+
+        <form action="{{ url_for('auth.register') }}" method="POST" class="auth-form">
+
+            <div class="form-group">
+                <label for="username">
+                    <span class="form-icon">👤</span> 用户名
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="4-20位字母数字组合"
+                    required
+                    minlength="4"
+                    maxlength="20"
+                >
+                <small class="form-hint">用户名注册后不可修改</small>
+            </div>
+
+            <div class="form-group">
+                <label for="nickname">
+                    <span class="form-icon">🏷️</span> 昵称
+                </label>
+                <input
+                    type="text"
+                    id="nickname"
+                    name="nickname"
+                    placeholder="你在排行榜上的名字"
+                    maxlength="20"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <span class="form-icon">🔒</span> 密码
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="请输入密码（6位以上）"
+                    required
+                    minlength="6"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password2">
+                    <span class="form-icon">🔑</span> 确认密码
+                </label>
+                <input
+                    type="password"
+                    id="password2"
+                    name="password2"
+                    placeholder="再次输入密码"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block">
+                🌟 创建我的角色
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>已有账号？ <a href="{{ url_for('auth.login') }}">立即登录</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 前端校验两次密码是否一致
+document.querySelector('form').addEventListener('submit', function(e) {
+    const p1 = document.getElementById('password').value;
+    const p2 = document.getElementById('password2').value;
+    if (p1 !== p2) {
+        e.preventDefault();
+        alert('两次输入的密码不一致！');
+    }
+});
+</script>
+{% endblock %}

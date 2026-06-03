@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}首页{% endblock %}
+
+{% block content %}
+<!-- ========== 英雄区域：游戏标题 ========== -->
+<section class="hero-section">
+    <div class="hero-bg">
+        <!-- 漂浮的树木和动物装饰 -->
+        <div class="floating-deco deco-1">🌲</div>
+        <div class="floating-deco deco-2">🌳</div>
+        <div class="floating-deco deco-3">🍃</div>
+        <div class="floating-deco deco-4">🦊</div>
+        <div class="floating-deco deco-5">🐰</div>
+        <div class="floating-deco deco-6">🌸</div>
+    </div>
+
+    <div class="hero-content">
+        <div class="game-title-wrap">
+            <h1 class="game-title">
+                <span class="title-icon">🌲</span>
+                森林酷跑
+                <span class="title-icon">🌲</span>
+            </h1>
+            <p class="game-subtitle">在茂密森林中奔跑，跳越障碍，收集金币！</p>
+        </div>
+
+        <!-- 主要操作按钮 -->
+        <div class="hero-buttons">
+            <a href="{{ url_for('game.game') }}" class="btn btn-start">
+                🎮 开始游戏
+            </a>
+            <a href="{{ url_for('score.rank') }}" class="btn btn-rank">
+                🏆 排行榜
+            </a>
+            <a href="{{ url_for('game.profile') }}" class="btn btn-profile">
+                📊 我的成绩
+            </a>
+            <button class="btn btn-help" onclick="showHelp()">
+                📖 游戏说明
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ========== 游戏特色介绍 ========== -->
+<section class="features-section">
+    <h2 class="section-title">🎯 游戏玩法</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">⬆️</div>
+            <h3>跳跃闯关</h3>
+            <p>按空格键或 ↑ 键跳跃，越过各种障碍物</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⬇️</div>
+            <h3>下滑躲避</h3>
+            <p>按 ↓ 键下滑，躲避低矮的飞行障碍</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <h3>收集金币</h3>
+            <p>收集道路上的金币，获得额外加分</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🏆</div>
+            <h3>挑战排名</h3>
+            <p>刷新最高分，登上全服排行榜榜首</p>
+        </div>
+    </div>
+</section>
+
+<!-- ========== 游戏说明弹窗 ========== -->
+<div id="helpModal" class="modal hidden">
+    <div class="modal-overlay" onclick="hideHelp()"></div>
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>📖 游戏说明</h3>
+            <button onclick="hideHelp()" class="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+            <table class="help-table">
+                <tr><th>按键</th><th>动作</th></tr>
+                <tr><td>空格 / ↑</td><td>跳跃</td></tr>
+                <tr><td>↓</td><td>下滑（开发中）</td></tr>
+                <tr><td>P</td><td>暂停 / 继续</td></tr>
+                <tr><td>R</td><td>重新开始</td></tr>
+            </table>
+            <p class="help-tip">💡 跑得越远，分数越高！碰到障碍物游戏结束。</p>
+        </div>
+        <div class="modal-footer">
+            <a href="{{ url_for('game.game') }}" class="btn btn-start">🚀 立即开始</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showHelp() {
+    document.getElementById('helpModal').classList.remove('hidden');
+}
+function hideHelp() {
+    document.getElementById('helpModal').classList.add('hidden');
+}
+</script>
+{% endblock %}
