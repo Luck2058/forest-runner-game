@@ -1,29 +1,31 @@
 """
-app/routes/score.py —— 成绩排行榜蓝图
+app/routes/score.py -- 成绩排行榜蓝图
 负责：提交成绩、查询排行榜、个人历史成绩
 由【成员四：MySQL 数据库与排行榜】负责完善
 """
 
 from flask import Blueprint, render_template, request, jsonify, session
+from app import db
+from app.models.score import Score
+from app.models.user import User
 
 # 创建成绩蓝图，url 前缀为 /score
 score_bp = Blueprint('score', __name__)
 
-# 演示用内存数据，后续成员四改为真实数据库查询
-DEMO_SCORES = [
-    {'rank': 1, 'username': '森林小熊', 'score': 9980, 'coins': 88, 'distance': 2500},
-    {'rank': 2, 'username': '飞奔兔子', 'score': 8760, 'coins': 72, 'distance': 2100},
-    {'rank': 3, 'username': '跑酷松鼠', 'score': 7650, 'coins': 65, 'distance': 1900},
-    {'rank': 4, 'username': '冒险狐狸', 'score': 6540, 'coins': 55, 'distance': 1600},
-    {'rank': 5, 'username': '快乐鹿鹿', 'score': 5430, 'coins': 48, 'distance': 1400},
-]
-
 
 @score_bp.route('/rank')
 def rank():
-    """排行榜页面"""
-    # TODO：成员四 —— 从数据库查询前 N 名成绩
-    return render_template('rank.html', scores=DEMO_SCORES)
+    """排行榜页面 -- 从数据库查询前 N 名成绩"""
+    scores = Score.get_global_ranking(limit=20)
+    return render_template('rank.html', scores=scores)
+
+
+@score_bp.route('/api/rank')
+def api_rank():
+    """排行榜 API -- 返回 JSON 格式排行榜数据（供前端 AJAX 调用）"""
+    limit = request.args.get('limit', 20, type=int)
+    scores = Score.get_global_ranking(limit=limit)
+    return jsonify({'success': True, 'scores': scores})
 
 
 @score_bp.route('/submit', methods=['POST'])
@@ -36,22 +38,74 @@ def submit_score():
     if not data:
         return jsonify({'success': False, 'message': '数据格式错误'}), 400
 
-    score = data.get('score', 0)
+    # 检查用户是否登录
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'message': '请先登录！'}), 401
+
+    # 获取并校验数据
+    score_value = data.get('score', 0)
     coins = data.get('coins', 0)
     distance = data.get('distance', 0)
+    difficulty = data.get('difficulty', 'normal')
+    play_time = data.get('play_time', 0)
 
-    # TODO：成员四 —— 将成绩存入 scores 数据库表
-    print(f"[成绩提交] 用户: {session.get('username', '游客')}, 分数: {score}, 金币: {coins}")
+    # 数据校验
+    if not isinstance(score_value, int) or score_value < 0:
+        return jsonify({'success': False, 'message': '分数格式错误'}), 400
 
-    return jsonify({'success': True, 'message': '成绩已保存！'})
+    # 创建成绩记录并保存到数据库
+    new_score = Score(
+        user_id=user_id,
+        score=score_value,
+        coins=coins,
+        distance=distance,
+        difficulty=difficulty,
+        play_time=play_time
+    )
+    db.session.add(new_score)
+    db.session.commit()
+
+    # 获取用户最高分用于判断新纪录
+    best_score = Score.get_user_best_score(user_id)
+    is_new_record = score_value >= best_score
+
+    return jsonify({
+        'success': True,
+        'message': '成绩已保存！',
+        'is_new_record': is_new_record,
+        'score_id': new_score.id
+    })
 
 
 @score_bp.route('/my-scores')
 def my_scores():
-    """个人历史成绩接口（AJAX 调用）"""
-    # TODO：成员四 —— 根据 session 中的 user_id 查询个人历史成绩
-    demo_my = [
-        {'score': 3200, 'coins': 30, 'distance': 800, 'create_time': '2024-06-01 14:30'},
-        {'score': 2100, 'coins': 20, 'distance': 550, 'create_time': '2024-06-01 10:15'},
-    ]
-    return jsonify({'success': True, 'scores': demo_my})
+    """个人历史成绩接口（AJAX 调用）-- 返回当前登录用户的所有成绩"""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'message': '请先登录！'}), 401
+
+    scores = Score.get_user_scores(user_id)
+    scores_data = [s.to_dict() for s in scores]
+
+    # 附加统计信息
+    total_games = len(scores_data)
+    best_score = scores_data[0]['score'] if scores_data else 0
+    total_coins = sum(s['coins'] for s in scores_data)
+
+    return jsonify({
+        'success': True,
+        'scores': scores_data,
+        'statistics': {
+            'total_games': total_games,
+            'best_score': best_score,
+            'total_coins': total_coins
+        }
+    })
+
+
+@score_bp.route('/statistics')
+def statistics():
+    """全局统计信息接口"""
+    stats = Score.get_statistics()
+    return jsonify({'success': True, 'statistics': stats})
