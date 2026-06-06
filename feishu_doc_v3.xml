@@ -1,0 +1,643 @@
+<title>森林酷跑项目 — 任务分工与协作指南</title>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="📋">
+  <p><b>项目名称</b>：《森林酷跑》——基于 Flask + MySQL 的 Web 休闲跑酷小游戏系统</p>
+  <p><b>项目定位</b>：类似地铁跑酷 / 熊出没快跑的 2D Web 跑酷小游戏。玩家登录后进入游戏，控制角色跳跃、下滑或左右移动，躲避障碍物，收集金币和道具，游戏结束后系统记录分数、距离、金币数量，并展示排行榜和个人历史成绩。</p>
+  <p><b>技术栈</b>：Flask 3 + MySQL + HTML5 Canvas + JavaScript<br/>
+  <i>开发阶段可使用 SQLite 快速测试，最终展示和文档以 MySQL 为准。</i></p>
+  <p><b>仓库地址</b>：<a href="https://github.com/Luck2058/forest-runner-game">https://github.com/Luck2058/forest-runner-game</a></p>
+  <p><b>文档更新</b>：2026-06-03</p>
+  <hr/>
+  <p><b>📌 选题依据</b>：课程要求休闲小游戏具备登录功能、记录玩家成绩，并体现趣味性和可玩性；成果展示需要提交 Word 文档，内容包括功能模块图和运行截图。</p>
+</callout>
+
+<hr/>
+
+<h1>一、项目运行方式</h1>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="💡">
+  <p>组长已验证：全部 7 个页面均可正常访问（首页 / 登录 / 注册 / 游戏 / 排行榜 / 个人中心 / 管理后台）。</p>
+</callout>
+
+<p>在项目根目录打开终端：</p>
+
+<pre lang="powershell" caption="启动项目"><code>cd D:\WorkBuddy_project\forest-cool-run\forest-runner-game
+.\venv\Scripts\activate
+pip install -r requirements.txt
+python run.py</code></pre>
+
+<p>浏览器访问 <b>http://127.0.0.1:5000</b> 即可。</p>
+
+<hr/>
+
+<h1>二、任务分工</h1>
+
+<p>我是组长，主要负责整体统筹、进度推进、最终整合、文档审核和现场汇报。其他 5 位同学从下面 5 个岗位中选择，每个岗位都有明确成果，最后每个人都能在展示时讲出自己的贡献。</p>
+
+<callout background-color="rgb(254,241,241)" border-color="rgb(249,142,139)" emoji="💡">
+  <p><b>选择建议</b>：大家优先选自己感兴趣的方向；如果多人想选同一岗位，可以两人协商，或者由组长根据实际进度调整。</p>
+</callout>
+
+<h2>任务 1：游戏核心逻辑 🎮（A 岗）</h2>
+
+<callout background-color="rgb(240,251,239)" border-color="rgb(142,224,133)" emoji="🎮">
+  <p><b>分支</b>：<code>feature/game-core</code></p>
+  <p><b>适合的人</b>：喜欢写代码、想做游戏玩法的同学</p>
+  <p><b>核心文件</b>：<code>app/static/js/game.js</code></p>
+</callout>
+
+<p><b>负责内容</b>：</p>
+<ul>
+  <li>角色移动、跳跃（含二段跳）、下滑与左右移动</li>
+  <li>障碍物随机生成与移动</li>
+  <li>AABB 碰撞检测（矩形 vs 矩形、矩形 vs 圆形）</li>
+  <li>分数计算、金币收集、速度递增</li>
+  <li>游戏开始、暂停、结束判定与重新开始</li>
+  <li>游戏结束自动提交成绩（AJAX）</li>
+</ul>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🤖">
+  <p><b>AI 提示词模板</b>（复制给 AI Agent 使用）：</p>
+<pre caption="游戏核心负责人提示词" lang="text"><code>你现在是一个 Web 休闲跑酷小游戏开发助手。
+
+项目技术栈是 Flask + HTML + CSS + JavaScript Canvas + MySQL。
+我负责的是游戏核心逻辑，主要文件是 app/static/js/game.js 和 app/templates/game.html。
+
+请帮我实现一个 2D 跑酷小游戏核心功能：
+• 玩家角色显示在画布左下方
+• 背景向左移动，形成奔跑效果
+• 障碍物从右向左移动
+• 玩家可以按空格或 ↑ 键跳跃（支持二段跳）
+• 玩家可以按 ↓ 键下滑
+• 碰到障碍物后游戏结束
+• 游戏过程中分数不断增加
+• 游戏结束后显示最终分数，并通过 AJAX 提交成绩
+
+要求：
+• 先告诉我需要修改哪些文件
+• 然后分别给出完整代码
+• 代码要有中文注释
+• 不要修改后端和数据库部分</code></pre>
+</callout>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🎤">
+  <p><b>展示时可讲</b>：可以现场演示角色怎么跑、怎么躲障碍、怎么收集金币，以及撞到障碍后如何结束游戏。</p>
+</callout>
+
+<h2>任务 2：页面美化与趣味交互 🎨（B 岗）</h2>
+
+<callout background-color="rgb(240,251,239)" border-color="rgb(142,224,133)" emoji="🎨">
+  <p><b>分支</b>：<code>feature/ui-design</code></p>
+  <p><b>适合的人</b>：喜欢页面设计、素材、动效的同学</p>
+  <p><b>核心文件</b>：<code>app/static/css/style.css</code>、<code>app/templates/*.html</code></p>
+</callout>
+
+<p><b>负责内容</b>：</p>
+<ul>
+  <li>森林背景、角色图片、障碍物、金币、道具图标</li>
+  <li>游戏首页美化、按钮交互、卡片样式</li>
+  <li>音效设计与音效开关</li>
+  <li>难度选择界面</li>
+  <li>响应式适配</li>
+</ul>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🤖">
+  <p><b>AI 提示词模板</b>（复制给 AI Agent 使用）：</p>
+<pre caption="美术交互负责人提示词" lang="text"><code>你现在是一个 Web 游戏 UI 设计助手。
+
+我们的项目是《森林酷跑休闲小游戏系统》，技术栈是 Flask + HTML + CSS + JavaScript。
+我负责页面美化和趣味交互，主要修改 templates 页面、app/static/css/style.css、app/static/images 和 app/static/audio。
+
+请帮我设计游戏首页和游戏页面：
+• 首页有项目标题"森林酷跑"
+• 有开始游戏、排行榜、我的成绩、游戏说明按钮
+• 页面风格是森林、卡通、轻松休闲
+• 游戏页面要包含分数、金币数、难度、暂停按钮
+• 页面适配电脑屏幕，也尽量适配手机
+• CSS 要美观，颜色清新
+
+要求：
+• 先列出要修改的文件
+• 然后给出 HTML 和 CSS 代码
+• 代码加中文注释
+• 不要影响游戏核心逻辑</code></pre>
+</callout>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🎤">
+  <p><b>展示时可讲</b>：可以展示游戏界面、素材风格、难度选择、按钮和音效等趣味设计。</p>
+</callout>
+
+<h2>任务 3：Flask 后端功能 ⚙️（C 岗）</h2>
+
+<callout background-color="rgb(240,251,239)" border-color="rgb(142,224,133)" emoji="⚙️">
+  <p><b>分支</b>：<code>feature/backend-auth</code></p>
+  <p><b>适合的人</b>：愿意做系统后端的同学</p>
+  <p><b>核心文件</b>：<code>app/routes/auth.py</code>、<code>app/routes/score.py</code>、<code>app/routes/game.py</code></p>
+</callout>
+
+<p><b>负责内容</b>：</p>
+<ul>
+  <li>搭建 Flask 项目结构（工厂函数 + 蓝图）</li>
+  <li>用户注册（表单验证、密码加密存储）</li>
+  <li>用户登录 / 退出登录（Flask-Login session 管理）</li>
+  <li>页面路由与权限控制（未登录跳转）</li>
+  <li>保存成绩接口 <code>POST /score/submit</code></li>
+  <li>排行榜接口 <code>GET /score/rank</code></li>
+  <li>个人历史成绩接口 <code>GET /score/my-scores</code></li>
+  <li>前后端数据交互</li>
+</ul>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🤖">
+  <p><b>AI 提示词模板</b>（复制给 AI Agent 使用）：</p>
+<pre caption="Flask 后端负责人提示词" lang="text"><code>你现在是 Flask 后端开发助手。
+
+项目是《森林酷跑休闲小游戏系统》，技术栈是 Flask + MySQL。
+我负责后端路由和接口，目录结构如下：
+app/routes/auth.py
+app/routes/game.py
+app/routes/score.py
+app/routes/admin.py
+app/models/user.py
+app/models/score.py
+templates/
+static/
+
+请帮我实现以下后端功能：
+• 用户注册
+• 用户登录
+• 用户退出登录
+• 登录后才能进入游戏页面
+• 提供保存游戏成绩的接口
+• 提供查询排行榜的接口
+• 提供查询个人历史成绩的接口
+
+要求：
+• 使用 Flask session 保存登录状态
+• 数据库使用 MySQL
+• 先说明数据库表字段
+• 再说明要修改哪些文件
+• 最后给出代码
+• 代码加中文注释</code></pre>
+</callout>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🎤">
+  <p><b>展示时可讲</b>：可以讲清楚后端路由、接口作用，以及游戏结束后分数如何保存到数据库。</p>
+</callout>
+
+<h2>任务 4：数据库与成绩系统 🗄️（D 岗）</h2>
+
+<callout background-color="rgb(240,251,239)" border-color="rgb(142,224,133)" emoji="🗄️">
+  <p><b>分支</b>：<code>feature/database-score</code></p>
+  <p><b>适合的人</b>：适合做数据表、排行榜、个人中心的同学</p>
+  <p><b>核心文件</b>：<code>database/forest_runner.sql</code>、<code>app/models/*.py</code></p>
+</callout>
+
+<p><b>负责内容</b>：</p>
+<ul>
+  <li>设计用户表（users）、成绩表（scores）、公告表（notices）、皮肤表（skins）</li>
+  <li>写建表 SQL 并插入测试数据</li>
+  <li>用户模型完善（User 字段验证和查询）</li>
+  <li>成绩模型完善（与 User 关联）</li>
+  <li>排行榜 SQL 查询优化（TOP N + 排名）</li>
+  <li>排行榜页面、个人历史成绩页面</li>
+  <li>最高分、总局数、金币数等统计展示</li>
+  <li>开发 / 生产环境数据库切换配置</li>
+</ul>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🤖">
+  <p><b>AI 提示词模板</b>（复制给 AI Agent 使用）：</p>
+<pre caption="数据库负责人提示词" lang="text"><code>你现在是 MySQL 数据库设计助手。
+
+项目是《森林酷跑休闲小游戏系统》。
+系统功能包括：用户注册登录、游戏成绩保存、排行榜、个人历史成绩、后台成绩管理。
+
+请帮我设计 MySQL 数据库：
+• 用户表 user
+• 成绩表 score
+• 公告表 notice，可选
+• 皮肤表 skin，可选
+
+要求：
+• 每张表说明字段含义
+• 给出完整 CREATE TABLE SQL
+• 插入几条测试数据
+• 说明用户表和成绩表之间的关系
+• 字段不要太复杂，适合学生期末项目</code></pre>
+</callout>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🎤">
+  <p><b>展示时可讲</b>：可以展示数据库表结构、排行榜页面、个人中心和历史成绩记录。</p>
+</callout>
+
+<h2>任务 5：测试、截图与展示材料 🧪（E 岗）</h2>
+
+<callout background-color="rgb(240,251,239)" border-color="rgb(142,224,133)" emoji="🧪">
+  <p><b>分支</b>：<code>feature/test-docs</code></p>
+  <p><b>适合的人</b>：细心、表达能力好、愿意做演示准备的同学</p>
+  <p><b>核心文件</b>：<code>tests/</code>、<code>docs/</code></p>
+</callout>
+
+<p><b>负责内容</b>：</p>
+<ul>
+  <li>测试登录注册、游戏运行、成绩保存、排行榜刷新</li>
+  <li>记录 Bug 并跟踪修复</li>
+  <li>整理运行截图（所有页面 + 关键操作）</li>
+  <li>准备演示流程、录制备用演示视频</li>
+  <li>补充项目说明文字、整理 Word 文档素材</li>
+  <li>协助组长整理功能模块图素材和文字材料</li>
+  <li>单元测试补充</li>
+</ul>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🤖">
+  <p><b>AI 提示词模板</b>（复制给 AI Agent 使用）：</p>
+<pre caption="测试展示负责人提示词" lang="text"><code>你现在是项目测试和展示文档助手。
+
+项目是《森林酷跑休闲小游戏系统》。
+我负责测试、运行截图、演示流程和项目说明。
+
+请帮我整理：
+• 系统测试用例表
+• 登录注册测试
+• 游戏开始测试
+• 碰撞结束测试
+• 成绩保存测试
+• 排行榜测试
+• 个人成绩测试
+• 项目演示流程
+• 运行截图清单
+
+要求：
+• 内容适合放进 Word 文档
+• 语言正式一点，但不要太复杂</code></pre>
+</callout>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🎤">
+  <p><b>展示时可讲</b>：可以展示测试记录、运行截图、演示流程，保证课堂展示不翻车。</p>
+</callout>
+
+<hr/>
+
+<h2>👤 组长职责</h2>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="👤">
+  <p><b>组长负责</b>：仓库管理、代码审查与合并、功能模块图绘制、最终 Word 文档、最终演示。</p>
+  <p><i>注：功能模块图由组长负责整体绘制，E 岗协助整理截图和文字材料。</i></p>
+</callout>
+
+<hr/>
+
+<h1>三、项目功能模块建议</h1>
+
+<table>
+  <colgroup><col width="180"/><col width="300"/></colgroup>
+  <thead>
+    <tr>
+      <th background-color="rgb(242,243,245)">功能模块</th>
+      <th background-color="rgb(242,243,245)">主要内容</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><b>用户管理</b></td><td>注册、登录、退出登录、个人信息</td></tr>
+    <tr><td><b>游戏管理</b></td><td>开始游戏、暂停游戏、角色跳跃/下滑/左右移动、障碍物生成、碰撞检测</td></tr>
+    <tr><td><b>成绩管理</b></td><td>本局得分、成绩保存、历史成绩、最高分、排行榜</td></tr>
+    <tr><td><b>趣味扩展</b></td><td>金币收集、道具加成、难度选择、角色皮肤、背景音效</td></tr>
+    <tr><td><b>系统管理</b></td><td>用户列表、成绩列表、公告管理、数据统计</td></tr>
+  </tbody>
+</table>
+
+<hr/>
+
+<h1>四、每个人最后汇报的一句话</h1>
+
+<ul>
+  <li><b>组长</b>：我负责项目整体规划、任务分配、进度推进、文档整合和最终演示。</li>
+  <li><b>A 岗（游戏核心）</b>：我负责跑酷游戏核心玩法，包括角色控制、障碍物生成、碰撞检测和分数计算。</li>
+  <li><b>B 岗（美术交互）</b>：我负责游戏视觉设计、素材制作、难度选择和趣味交互。</li>
+  <li><b>C 岗（Flask 后端）</b>：我负责 Flask 后端框架搭建，实现登录注册、成绩保存和排行榜接口。</li>
+  <li><b>D 岗（数据库）</b>：我负责 MySQL 数据库设计，以及排行榜、个人成绩和数据统计页面。</li>
+  <li><b>E 岗（测试文档）</b>：我负责系统测试、运行截图、演示流程和项目优化，保证项目能稳定展示。</li>
+</ul>
+
+<hr/>
+
+<h1>五、Git 分支与协作规范（⚠️ 重点！）</h1>
+
+<callout background-color="rgb(254,241,241)" border-color="rgb(249,142,139)" emoji="⚠️">
+  <p><b>核心规则</b>：不要直接改 main / dev 分支，每个人只改自己的 feature 分支！</p>
+  <p>所有合并由组长统一操作，组员不要自行合并到 dev 或 main。</p>
+</callout>
+
+<h2>分支说明</h2>
+
+<table>
+  <colgroup><col width="160"/><col width="100"/><col width="160"/><col width="200"/></colgroup>
+  <thead>
+    <tr>
+      <th background-color="rgb(242,243,245)">分支名</th>
+      <th background-color="rgb(242,243,245)">负责人</th>
+      <th background-color="rgb(242,243,245)">岗位</th>
+      <th background-color="rgb(242,243,245)">任务</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>main</code></td><td>组长</td><td>正式发布</td><td>仅组长可合并，稳定版本</td></tr>
+    <tr><td><code>dev</code></td><td>组长</td><td>开发集成</td><td>各 feature 合并到这里，组长统一管理</td></tr>
+    <tr><td><code>feature/game-core</code></td><td>成员一</td><td>A 岗</td><td>游戏核心逻辑</td></tr>
+    <tr><td><code>feature/ui-design</code></td><td>成员二</td><td>B 岗</td><td>页面美化与交互</td></tr>
+    <tr><td><code>feature/backend-auth</code></td><td>成员三</td><td>C 岗</td><td>Flask 后端功能</td></tr>
+    <tr><td><code>feature/database-score</code></td><td>成员四</td><td>D 岗</td><td>数据库与成绩系统</td></tr>
+    <tr><td><code>feature/test-docs</code></td><td>成员五</td><td>E 岗</td><td>测试截图与文档</td></tr>
+  </tbody>
+</table>
+
+<h2>第一次下载项目</h2>
+
+<pre lang="bash" caption="克隆仓库"><code>git clone https://github.com/Luck2058/forest-runner-game.git
+cd forest-runner-game</code></pre>
+
+<h2>切换到自己的功能分支</h2>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="📌">
+  <p>⚠️ 分支已经由组长创建好并推送到 GitHub，你<b>只需要切换</b>，不需要重新创建。</p>
+</callout>
+
+<pre lang="bash" caption="以游戏核心为例"><code>git checkout dev
+git pull origin dev
+git checkout feature/game-core</code></pre>
+
+<h2>修改后提交</h2>
+
+<pre lang="bash" caption="提交代码"><code>git add .
+git commit -m "feat: 完成角色跳跃和障碍物碰撞"
+git push</code></pre>
+
+<h2>提交信息规范（必须遵守！）</h2>
+
+<p>提交信息不要写"修改了一下"，要用语义化格式：</p>
+
+<table>
+  <colgroup><col width="120"/><col width="200"/><col width="250"/></colgroup>
+  <thead>
+    <tr>
+      <th background-color="rgb(242,243,245)">前缀</th>
+      <th background-color="rgb(242,243,245)">含义</th>
+      <th background-color="rgb(242,243,245)">示例</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>feat:</code></td><td>新功能</td><td><code>feat: 完成角色跳跃功能</code></td></tr>
+    <tr><td><code>fix:</code></td><td>修复 bug</td><td><code>fix: 修复登录失败问题</code></td></tr>
+    <tr><td><code>style:</code></td><td>页面样式</td><td><code>style: 优化首页按钮样式</code></td></tr>
+    <tr><td><code>docs:</code></td><td>文档</td><td><code>docs: 添加项目运行说明</code></td></tr>
+    <tr><td><code>test:</code></td><td>测试</td><td><code>test: 添加登录功能测试记录</code></td></tr>
+    <tr><td><code>refactor:</code></td><td>代码优化</td><td><code>refactor: 优化成绩查询逻辑</code></td></tr>
+  </tbody>
+</table>
+
+<h2>合并流程（组长操作）</h2>
+
+<ul>
+  <li>组员在各自 feature 分支开发完成，push 到远程</li>
+  <li>组长 review 代码后，将 feature 合并到 dev</li>
+  <li>在 dev 上测试通过后，由组长合并到 main</li>
+  <li>main 分支仅保留稳定可运行的版本</li>
+</ul>
+
+<h2>注意事项（⚠️ 必读）</h2>
+
+<ul>
+  <li>❌ 不要直接在 main 分支写代码</li>
+  <li>❌ 不要直接在 dev 分支写代码</li>
+  <li>❌ 不要上传 venv、__pycache__、*.db 文件（已在 .gitignore 配置）</li>
+  <li>❌ 不要自行合并分支，统一由组长操作</li>
+  <li>✅ 每次写代码前先 <code>git pull</code></li>
+  <li>✅ 提交前必须自己运行一遍，确保没有引入 bug</li>
+  <li>✅ 提交信息用语义化格式：<code>feat:</code> / <code>fix:</code> / <code>docs:</code></li>
+</ul>
+
+<hr/>
+
+<h1>六、最低可交付版本 vs 加分版本</h1>
+
+<grid>
+
+<callout background-color="rgb(240,251,239)" border-color="rgb(142,224,133)" emoji="✅">
+  <p><b>最低可交付版本</b>（必须先完成）</p>
+  <ul>
+    <li>登录注册功能</li>
+    <li>游戏能跑（角色移动 + 障碍物 + 碰撞）</li>
+    <li>分数统计</li>
+    <li>成绩保存到数据库</li>
+    <li>排行榜显示</li>
+    <li>运行截图整理</li>
+  </ul>
+</callout>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="⭐">
+  <p><b>加分版本</b>（完成基础后再加）</p>
+  <ul>
+    <li>难度选择（简单 / 普通 / 困难）</li>
+    <li>金币收集系统</li>
+    <li>道具系统（护盾、加速等）</li>
+    <li>音效开关</li>
+    <li>皮肤切换</li>
+    <li>后台数据统计页面</li>
+  </ul>
+</callout>
+
+</grid>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="💡">
+  <p><b>建议原则</b>：先保证最低可交付版本能稳定运行，再逐步加趣味功能。不要一开始堆太多功能，避免最后整合失败。</p>
+</callout>
+
+<hr/>
+
+<h1>七、开发阶段规划</h1>
+
+<h2>第一阶段 ✅ 基础版本确认（组长已完成）</h2>
+<checkbox done="true">项目能启动</checkbox>
+<checkbox done="true">首页能打开</checkbox>
+<checkbox done="true">游戏页能打开</checkbox>
+<checkbox done="true">.gitignore、dev 分支就绪</checkbox>
+<checkbox done="true">5 个功能分支已创建并推送</checkbox>
+
+<h2>第二阶段 🎮 游戏先能玩（优先！）</h2>
+<p>由游戏核心负责人（A 岗）完成：</p>
+<checkbox done="false">角色跳跃（含二段跳）</checkbox>
+<checkbox done="false">障碍物移动</checkbox>
+<checkbox done="false">碰撞检测</checkbox>
+<checkbox done="false">分数增长 / 金币收集</checkbox>
+<checkbox done="false">游戏结束</checkbox>
+<checkbox done="false">重新开始</checkbox>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="💡">
+  <p>这个阶段完成后，项目就已经具有展示价值了。</p>
+</callout>
+
+<h2>第三阶段 🔗 登录与数据库</h2>
+<p>后端（C 岗）和数据库（D 岗）负责人合作：</p>
+<checkbox done="false">用户注册</checkbox>
+<checkbox done="false">用户登录</checkbox>
+<checkbox done="false">成绩保存到数据库</checkbox>
+<checkbox done="false">排行榜（真实数据）</checkbox>
+<checkbox done="false">个人历史成绩</checkbox>
+
+<h2>第四阶段 🎨 美化与趣味</h2>
+<p>美术交互负责人（B 岗）完成：</p>
+<checkbox done="false">森林背景样式</checkbox>
+<checkbox done="false">角色图片素材</checkbox>
+<checkbox done="false">金币样式</checkbox>
+<checkbox done="false">按钮与卡片样式</checkbox>
+<checkbox done="false">难度选择</checkbox>
+<checkbox done="false">音效开关</checkbox>
+
+<h2>第五阶段 📝 测试与文档</h2>
+<p>测试展示负责人（E 岗）完成：</p>
+<checkbox done="false">功能测试与 Bug 记录</checkbox>
+<checkbox done="false">运行截图整理</checkbox>
+<checkbox done="false">演示流程设计</checkbox>
+<checkbox done="false">项目说明文档</checkbox>
+<checkbox done="false">功能模块图（组长负责，E 岗协助）</checkbox>
+
+<hr/>
+
+<h1>八、使用 AI Agent 注意事项</h1>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="🤖">
+  <p>大家可以用 AI Agent 辅助完成，但请注意以下规则：</p>
+</callout>
+
+<ul>
+  <li><b>不要重新生成一个新项目</b>——在已有仓库基础上修改</li>
+  <li><b>只修改自己负责的文件</b>——避免冲突</li>
+  <li><b>每次让 AI 先说明要改哪些文件</b>——确认后再改</li>
+  <li><b>提交前必须自己运行一遍</b>——确保没有引入 bug</li>
+  <li><b>不要直接改 main 分支</b>——在自己的 feature 分支工作</li>
+  <li><b>让 AI 生成的代码必须加注释</b>——方便自己和组员理解</li>
+  <li><b>不懂的代码要让 AI 解释清楚</b>——展示时要能讲出来</li>
+  <li><b>不要提交无法运行的代码</b>——组长 review 时会打回</li>
+</ul>
+
+<hr/>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="📌">
+  <p><b>组长提醒</b>：大家在群里认领任务后，将你的名字填到对应任务后面，然后就可以开始在自己的分支上开发了。有问题随时在群里沟通！</p>
+  <p>选完后在群里回复"<b>岗位 + 姓名</b>"，例如："A 岗 张三"。</p>
+</callout>
+
+<hr/>
+
+<h1>九、每个岗位最终交付物</h1>
+
+<p>每个岗位最后必须提交具体成果，防止只有"我做了"的描述而没有实质交付。</p>
+
+<h2>A 岗 游戏核心：</h2>
+<ul>
+  <li>game.js 核心代码（带注释）</li>
+  <li>游戏运行截图（游戏中、结束页）</li>
+  <li>一段 30 秒以内的游戏演示录屏</li>
+  <li>简单说明：角色控制、障碍物、碰撞检测、计分逻辑（100-200 字）</li>
+</ul>
+
+<h2>B 岗 美术交互：</h2>
+<ul>
+  <li>页面美化后的截图（首页、游戏页、排行榜页）</li>
+  <li>使用的素材文件（图片放在 app/static/images/）</li>
+  <li>难度选择 / 音效 / 按钮交互说明</li>
+</ul>
+
+<h2>C 岗 Flask 后端：</h2>
+<ul>
+  <li>登录注册功能截图</li>
+  <li>主要路由接口说明（列出 API 路径和功能）</li>
+  <li>成绩提交接口说明（POST /score/submit 参数和返回）</li>
+</ul>
+
+<h2>D 岗 数据库成绩：</h2>
+<ul>
+  <li>SQL 建表文件（database/forest_runner.sql）</li>
+  <li>数据库表结构截图（desc users; desc scores;）</li>
+  <li>排行榜和个人成绩截图</li>
+</ul>
+
+<h2>E 岗 测试文档：</h2>
+<ul>
+  <li>测试用例表（docs/测试用例表.md）</li>
+  <li>Bug 记录（docs/Bug记录.md）</li>
+  <li>运行截图合集（docs/运行截图/）</li>
+  <li>展示流程稿（docs/演示流程.md）</li>
+</ul>
+
+<hr/>
+
+<h1>十、进度汇报格式</h1>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="💬">
+  <p><b>进度同步</b>：大家有空就在群里聊一下进展，有坑就喊，不用太正式，方便组长和大家互相知道进度。</p>
+</callout>
+
+<hr/>
+
+<h1>十一、提交前检查清单</h1>
+
+<callout background-color="rgb(254,241,241)" border-color="rgb(249,142,139)" emoji="💡">
+  <p>每次 push 前必须确认以下所有项，防止提交坏代码到仓库。</p>
+</callout>
+
+<ul>
+  <li>□ 项目能正常启动（python run.py 无报错）</li>
+  <li>□ 页面能正常打开（http://127.0.0.1:5000 无 500 错误）</li>
+  <li>□ 没有明显报错（浏览器控制台无红色错误）</li>
+  <li>□ 没有上传 venv、__pycache__、*.db 文件</li>
+  <li>□ 没有覆盖别人负责的文件</li>
+  <li>□ 提交信息格式正确（feat:/fix:/style:/docs:/test:）</li>
+  <li>□ 自己负责的功能有截图或简单说明</li>
+</ul>
+
+<hr/>
+
+<h1>十二、冲突处理规则</h1>
+
+<callout background-color="rgb(254,241,241)" border-color="rgb(249,142,139)" emoji="💡">
+  <p>多人协作时容易冲突，尤其是大家都改 style.css、base.html、game.html 等公共文件。</p>
+</callout>
+
+<ul>
+  <li>如果需要修改别人负责的文件，先在群里说明，征得同意后再改。</li>
+  <li>不要随意覆盖别人的代码，提交前用 git diff 确认改动范围。</li>
+  <li>如果 Git 出现冲突（CONFLICT），不要乱点确认，先截图发群里，由组长或对应模块负责人一起处理。</li>
+  <li>涉及公共文件如 base.html、style.css、config.py、README.md，由组长统一确认后再改。</li>
+  <li>合并冲突时，保留双方有价值的改动，删除冲突标记（&lt;&lt;&lt;&lt;&lt; / ====== / &gt;&gt;&gt;&gt;&gt;）后再提交。</li>
+</ul>
+
+<hr/>
+
+<h1>十三、最终 Word 文档材料要求</h1>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="📝">
+  <p>课程最终要交 Word 文档，里面需要包含功能模块图和运行截图，请大家提前配合收集材料。</p>
+</callout>
+
+<h2>每个岗位需要提供：</h2>
+<ul>
+  <li>自己负责模块的运行截图（至少 2 张）</li>
+  <li>负责功能的简短说明，100-200 字</li>
+  <li>关键代码截图（可选，用于 Word 文档展示）</li>
+  <li>遇到的问题和解决方法（可选，体现工作量）</li>
+  <li>最终展示时自己要讲的一句话（参考"四、每个人最后汇报的一句话"）</li>
+</ul>
+
+<h2>截图要求：</h2>
+<ul>
+  <li>截图清晰，能看清页面内容和浏览器地址栏</li>
+  <li>页面完整，不要只截一半</li>
+  <li>文件名规范，例如：登录页.png、排行榜页.png、游戏运行页.png</li>
+  <li>统一放到 docs/运行截图/ 目录下</li>
+</ul>
+
+<hr/>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="📌">
+  <p><b>组长提醒</b>：以上所有材料请在演示前提交给组长，方便整合到最终的 Word 文档和演示 PPT 中。</p>
+</callout>

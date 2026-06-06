@@ -1,0 +1,117 @@
+<hr/>
+<h1>九、每个岗位最终交付物</h1>
+
+<p>每个岗位最后必须提交具体成果，防止只有"我做了"的描述而没有实质交付。</p>
+
+<h2>A 岗 游戏核心：</h2>
+<ul>
+  <li>game.js 核心代码（带注释）</li>
+  <li>游戏运行截图（游戏中、结束页）</li>
+  <li>一段 30 秒以内的游戏演示录屏</li>
+  <li>简单说明：角色控制、障碍物、碰撞检测、计分逻辑（100-200 字）</li>
+</ul>
+
+<h2>B 岗 美术交互：</h2>
+<ul>
+  <li>页面美化后的截图（首页、游戏页、排行榜页）</li>
+  <li>使用的素材文件（图片放在 app/static/images/）</li>
+  <li>难度选择 / 音效 / 按钮交互说明</li>
+</ul>
+
+<h2>C 岗 Flask 后端：</h2>
+<ul>
+  <li>登录注册功能截图</li>
+  <li>主要路由接口说明（列出 API 路径和功能）</li>
+  <li>成绩提交接口说明（POST /score/submit 参数和返回）</li>
+</ul>
+
+<h2>D 岗 数据库成绩：</h2>
+<ul>
+  <li>SQL 建表文件（database/forest_runner.sql）</li>
+  <li>数据库表结构截图（desc users; desc scores;）</li>
+  <li>排行榜和个人成绩截图</li>
+</ul>
+
+<h2>E 岗 测试文档：</h2>
+<ul>
+  <li>测试用例表（docs/测试用例表.md）</li>
+  <li>Bug 记录（docs/Bug记录.md）</li>
+  <li>运行截图合集（docs/运行截图/）</li>
+  <li>展示流程稿（docs/演示流程.md）</li>
+</ul>
+
+<hr/>
+<h1>十、每日进度汇报格式</h1>
+
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="📌">
+  <p>每天晚上在群里简单汇报一次，方便组长掌握进度。</p>
+</callout>
+
+<pre caption="每日汇报格式" lang="text"><code>姓名：
+岗位：
+今天完成：
+遇到的问题：
+明天计划：
+是否已提交代码：
+截图 / 提交记录：</code></pre>
+
+<hr/>
+<h1>十一、提交前检查清单</h1>
+
+<callout background-color="rgb(254,241,241)" border-color="rgb(249,142,139)" emoji="⚠️">
+  <p>每次 push 前必须确认以下所有项，防止提交坏代码到仓库。</p>
+</callout>
+
+<ul>
+  <li>□ 项目能正常启动（python run.py 无报错）</li>
+  <li>□ 页面能正常打开（http://127.0.0.1:5000 无 500 错误）</li>
+  <li>□ 没有明显报错（浏览器控制台无红色错误）</li>
+  <li>□ 没有上传 venv、__pycache__、*.db 文件</li>
+  <li>□ 没有覆盖别人负责的文件</li>
+  <li>□ 提交信息格式正确（feat:/fix:/style:/docs:/test:）</li>
+  <li>□ 自己负责的功能有截图或简单说明</li>
+</ul>
+
+<hr/>
+<h1>十二、冲突处理规则</h1>
+
+<callout background-color="rgb(254,241,241)" border-color="rgb(249,142,139)" emoji="⚠️">
+  <p>多人协作时容易冲突，尤其是大家都改 style.css、base.html、game.html 等公共文件。</p>
+</callout>
+
+<ul>
+  <li>如果需要修改别人负责的文件，先在群里说明，征得同意后再改。</li>
+  <li>不要随意覆盖别人的代码，提交前用 git diff 确认改动范围。</li>
+  <li>如果 Git 出现冲突（CONFLICT），不要乱点确认，先截图发群里，由组长或对应模块负责人一起处理。</li>
+  <li>涉及公共文件如 base.html、style.css、config.py、README.md，由组长统一确认后再改。</li>
+  <li>合并冲突时，保留双方有价值的改动，删除冲突标记（&lt;&lt;&lt;&lt;&lt; / ======= / &gt;&gt;&gt;&gt;&gt;）后再提交。</li>
+</ul>
+
+<hr/>
+<h1>十三、最终 Word 文档材料要求</h1>
+
+<callout background-color="rgb(240,244,255)" border-color="rgb(130,167,252)" emoji="📝">
+  <p>课程最终要交 Word 文档，里面需要包含功能模块图和运行截图，请大家提前配合收集材料。</p>
+</callout>
+
+<h2>每个岗位需要提供：</h2>
+<ul>
+  <li>自己负责模块的运行截图（至少 2 张）</li>
+  <li>负责功能的简短说明，100-200 字</li>
+  <li>关键代码截图（可选，用于 Word 文档展示）</li>
+  <li>遇到的问题和解决方法（可选，体现工作量）</li>
+  <li>最终展示时自己要讲的一句话（参考"四、每个人最后汇报的一句话"）</li>
+</ul>
+
+<h2>截图要求：</h2>
+<ul>
+  <li>截图清晰，能看清页面内容和浏览器地址栏</li>
+  <li>页面完整，不要只截一半</li>
+  <li>文件名规范，例如：登录页.png、排行榜页.png、游戏运行页.png</li>
+  <li>统一放到 docs/运行截图/ 目录下</li>
+</ul>
+
+<hr/>
+<callout background-color="rgb(254,255,240)" border-color="rgb(255,242,88)" emoji="📌">
+  <p><b>组长提醒</b>：以上所有材料请在演示前 2 天提交给组长，方便整合到最终的 Word 文档和演示 PPT 中。</p>
+</callout>

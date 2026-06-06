@@ -222,3 +222,5 @@ git push -u origin feature/game-core
 ---
 
 *📅 项目创建时间：2026年6月*
+
+PR 权限测试
