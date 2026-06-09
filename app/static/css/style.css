@@ -429,6 +429,37 @@ img { max-width: 100%; }
     display: flex;
     gap: 0.8rem;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+/* 难度选择栏 */
+.difficulty-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.diff-label {
+    font-size: 0.85rem;
+    color: var(--text-mid);
+    font-weight: bold;
+}
+.diff-btn {
+    padding: 0.3rem 0.7rem;
+    border: 2px solid var(--green-light);
+    border-radius: 20px;
+    background: var(--white);
+    color: var(--green-dark);
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+}
+.diff-btn:hover {
+    background: var(--green-pale);
+}
+.diff-btn.active {
+    background: var(--green-dark);
+    color: var(--white);
+    border-color: var(--green-dark);
 }
 
 .key-guide {
