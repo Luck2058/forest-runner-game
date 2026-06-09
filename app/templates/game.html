@@ -94,6 +94,10 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- 加载游戏脚本 -->
-<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+<!-- 按依赖顺序加载游戏模块脚本 -->
+<script src="{{ url_for('static', filename='js/player.js') }}"></script>    <!-- ① 玩家角色模块 -->
+<script src="{{ url_for('static', filename='js/obstacle.js') }}"></script>   <!-- ② 障碍物&金币模块 -->
+<script src="{{ url_for('static', filename='js/score.js') }}"></script>      <!-- ③ 分数统计模块 -->
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>        <!-- ④ 后端接口模块 -->
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>        <!-- ⑤ 主控&主循环（最后加载）-->
 {% endblock %}
