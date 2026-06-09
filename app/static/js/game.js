@@ -40,15 +40,16 @@ const CONFIG = {
     OBS_W_MAX:  35,
     OBS_H_MIN:  35,
     OBS_H_MAX:  70,
-    OBS_SPEED:   5,       // 初始移动速度
+    OBS_SPEED:   3.5,     // 初始移动速度（降低：新手友好节奏）
 
     // 金币设置
     COIN_R:      12,      // 金币半径
-    COIN_SPEED:   5,
+    COIN_SPEED:   3.5,    // 金币移动速度（跟随障碍物速度）
 
     // 难度随时间加速（每 N 帧增加速度）
-    SPEED_UP_INTERVAL: 300,
-    SPEED_UP_AMOUNT:   0.3,
+    SPEED_UP_INTERVAL: 500,   // 加速间隔拉长（原300→500帧，约8秒加速一次）
+    SPEED_UP_AMOUNT:   0.12,  // 每次加速幅度减小（原0.3→0.12，更平缓）
+    MAX_SPEED:          10,   // 速度上限（防止跑太久后失控）
 
     // 障碍物生成间隔（帧数）
     OBS_INTERVAL_MIN: 90,
@@ -260,9 +261,13 @@ function update() {
     frameCount++;
     distance = Math.floor(frameCount / 10);  // 每10帧 = 1米
 
-    // ------ 1. 速度提升（随时间加速） ------
+    // ------ 1. 速度提升（随时间加速，有上限） ------
     if (frameCount % CONFIG.SPEED_UP_INTERVAL === 0) {
         gameSpeed += CONFIG.SPEED_UP_AMOUNT;
+        // 限制最大速度，防止后期失控
+        if (gameSpeed > CONFIG.MAX_SPEED) {
+            gameSpeed = CONFIG.MAX_SPEED;
+        }
     }
 
     // ------ 2. 玩家物理（重力 + 跳跃） ------
@@ -702,31 +707,31 @@ function gameLoop() {
 /** 难度配置预设（影响游戏参数） */
 const DIFFICULTY_PRESETS = {
     easy: {
-        OBS_SPEED:           4,
-        SPEED_UP_AMOUNT:     0.15,
-        OBS_INTERVAL_MIN:   120,
-        OBS_INTERVAL_MAX:   200,
-        AIR_OBS_CHANCE:      0.15,  // 空中障碍物更少
+        OBS_SPEED:           2.5,    // 很慢，适合完全新手
+        SPEED_UP_AMOUNT:     0.08,   // 几乎不加速
+        OBS_INTERVAL_MIN:   140,
+        OBS_INTERVAL_MAX:   240,     // 障碍物很稀疏
+        AIR_OBS_CHANCE:      0.10,   // 空中障碍物很少
         COIN_INTERVAL_MIN:   50,
-        COIN_INTERVAL_MAX:   90,
+        COIN_INTERVAL_MAX:   100,
         label: '简单',
     },
     normal: {
-        OBS_SPEED:           5,
-        SPEED_UP_AMOUNT:     0.3,
-        OBS_INTERVAL_MIN:    90,
-        OBS_INTERVAL_MAX:   160,
-        AIR_OBS_CHANCE:      0.30,
+        OBS_SPEED:           3.5,    // 适中节奏
+        SPEED_UP_AMOUNT:     0.12,   // 缓慢加速
+        OBS_INTERVAL_MIN:   100,
+        OBS_INTERVAL_MAX:   180,
+        AIR_OBS_CHANCE:      0.25,
         COIN_INTERVAL_MIN:   60,
         COIN_INTERVAL_MAX:   120,
         label: '普通',
     },
     hard: {
-        OBS_SPEED:           6.5,
-        SPEED_UP_AMOUNT:     0.45,
-        OBS_INTERVAL_MIN:    65,
-        OBS_INTERVAL_MAX:   120,
-        AIR_OBS_CHANCE:      0.40,  // 空中障碍物更多
+        OBS_SPEED:           5,      // 较快
+        SPEED_UP_AMOUNT:     0.20,   // 明显加速
+        OBS_INTERVAL_MIN:    70,
+        OBS_INTERVAL_MAX:   140,
+        AIR_OBS_CHANCE:      0.35,   // 空中障碍物较多
         COIN_INTERVAL_MIN:   70,
         COIN_INTERVAL_MAX:   140,
         label: '困难',
