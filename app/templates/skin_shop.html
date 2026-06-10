@@ -50,6 +50,7 @@
         <a href="{{ url_for('game.profile') }}" class="btn btn-outline">👤 个人中心</a>
     </div>
 </div>
+<script src="{{ url_for('static', filename='js/skin_preview.js') }}"></script>
 {% endblock %}
 
 {% block extra_js %}
@@ -66,113 +67,6 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-/** 绘制皮肤预览（Canvas 降级绘制，用皮肤配色） */
-function drawSkinPreview(ctx, skin, w, h) {
-    const primary = skin.primary_color;
-    const secondary = skin.secondary_color;
-    const accent = skin.accent_color;
-
-    // 身体
-    ctx.fillStyle = primary;
-    ctx.beginPath();
-    ctx.roundRect(w * 0.2, h * 0.35, w * 0.5, h * 0.4, 8);
-    ctx.fill();
-
-    // 肚子
-    ctx.fillStyle = secondary;
-    ctx.beginPath();
-    ctx.roundRect(w * 0.28, h * 0.42, w * 0.35, h * 0.28, 5);
-    ctx.fill();
-
-    // 小背心
-    ctx.fillStyle = accent;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.roundRect(w * 0.22, h * 0.38, w * 0.47, h * 0.2, 3);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // 头部
-    ctx.fillStyle = primary;
-    ctx.beginPath();
-    ctx.ellipse(w * 0.5, h * 0.22, w * 0.28, h * 0.2, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 脸部
-    ctx.fillStyle = secondary;
-    ctx.beginPath();
-    ctx.ellipse(w * 0.5, h * 0.25, w * 0.2, h * 0.14, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 耳朵
-    ctx.fillStyle = primary;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.25, h * 0.1);
-    ctx.lineTo(w * 0.18, h * 0.25);
-    ctx.lineTo(w * 0.33, h * 0.2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(w * 0.75, h * 0.1);
-    ctx.lineTo(w * 0.82, h * 0.25);
-    ctx.lineTo(w * 0.67, h * 0.2);
-    ctx.fill();
-
-    // 眼睛
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.4, h * 0.2, 5, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(w * 0.6, h * 0.2, 5, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 瞳孔
-    ctx.fillStyle = '#1a1a2e';
-    ctx.beginPath();
-    ctx.arc(w * 0.42, h * 0.2, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(w * 0.62, h * 0.2, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 眼睛高光
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(w * 0.43, h * 0.18, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(w * 0.63, h * 0.18, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 腮红
-    ctx.fillStyle = 'rgba(255,150,150,0.4)';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.3, h * 0.27, 5, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(w * 0.7, h * 0.27, 5, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 腿
-    ctx.fillStyle = primary;
-    ctx.beginPath();
-    ctx.roundRect(w * 0.25, h * 0.72, w * 0.15, h * 0.16, 4);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.roundRect(w * 0.52, h * 0.72, w * 0.15, h * 0.16, 4);
-    ctx.fill();
-
-    // 尾巴
-    ctx.fillStyle = primary;
-    ctx.beginPath();
-    ctx.ellipse(w * 0.1, h * 0.55, 10, 14, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = secondary;
-    ctx.beginPath();
-    ctx.ellipse(w * 0.08, h * 0.55, 5, 8, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-}
 
 /** 购买皮肤 */
 function buySkin(skinId) {
