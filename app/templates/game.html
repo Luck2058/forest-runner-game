@@ -4,7 +4,7 @@
 {% block content %}
 <div class="game-page">
 
-    <!-- ===== 游戏顶部状态栏 ===== -->
+    <!-- ===== 游戏顶部状态栏（B岗增强：添加难度和音效显示） ===== -->
     <div class="game-hud">
         <div class="hud-item">
             <span class="hud-label">⭐ 分数</span>
@@ -19,6 +19,10 @@
             <span class="hud-value"><span id="distDisplay">0</span>m</span>
         </div>
         <div class="hud-item">
+            <span class="hud-label">🎮 难度</span>
+            <span class="hud-value" id="diffDisplay">🍄 普通</span>
+        </div>
+        <div class="hud-item">
             <span class="hud-label">👤 玩家</span>
             <span class="hud-value">{{ username }}</span>
         </div>
@@ -28,24 +32,48 @@
     <div class="canvas-wrap">
         <canvas id="gameCanvas" width="800" height="300"></canvas>
 
-        <!-- 开始游戏遮罩层 -->
+        <!-- 开始游戏遮罩层（B岗增强：添加难度选择面板） -->
         <div id="startOverlay" class="game-overlay">
             <div class="overlay-content">
                 <div class="overlay-icon">🌲</div>
                 <h2>森林酷跑</h2>
                 <p>准备好了吗？跑进森林吧！</p>
+
+                <!-- 难度选择面板（B岗新增） -->
+                <div id="difficultyPanel" class="difficulty-panel">
+                    <p class="diff-title">选择难度</p>
+                    <div class="diff-buttons">
+                        <button id="diff-btn-easy" class="diff-btn" onclick="selectDifficulty('easy')">
+                            <span class="diff-icon">🌿</span>
+                            <span class="diff-label">简单</span>
+                            <span class="diff-desc">速度慢·障碍少</span>
+                        </button>
+                        <button id="diff-btn-normal" class="diff-btn diff-btn-active" onclick="selectDifficulty('normal')">
+                            <span class="diff-icon">🍄</span>
+                            <span class="diff-label">普通</span>
+                            <span class="diff-desc">标准·平衡体验</span>
+                        </button>
+                        <button id="diff-btn-hard" class="diff-btn" onclick="selectDifficulty('hard')">
+                            <span class="diff-icon">🔥</span>
+                            <span class="diff-label">困难</span>
+                            <span class="diff-desc">高速·障碍密集</span>
+                        </button>
+                    </div>
+                </div>
+
                 <button id="startBtn" class="btn btn-start btn-lg" onclick="startGame()">
                     🎮 开始游戏
                 </button>
-                <p class="key-hint">空格 / ↑键 跳跃 &nbsp;|&nbsp; P 暂停</p>
+                <p class="key-hint">空格 / ↑键 跳跃 &nbsp;|&nbsp; P 暂停 &nbsp;|&nbsp; ↓ 下滑</p>
             </div>
         </div>
 
-        <!-- 游戏结束遮罩层 -->
+        <!-- 游戏结束遮罩层（B岗增强：显示难度和更丰富的结果） -->
         <div id="gameOverOverlay" class="game-overlay hidden">
             <div class="overlay-content">
                 <div class="overlay-icon">😵</div>
                 <h2>游戏结束</h2>
+                <div class="result-difficulty" id="resultDifficulty">🍄 普通模式</div>
                 <div class="result-stats">
                     <div class="stat-item">
                         <span>本局得分</span>
@@ -68,18 +96,20 @@
         </div>
     </div>
 
-    <!-- ===== 控制按钮 ===== -->
+    <!-- ===== 控制按钮（B岗增强：添加音效开关） ===== -->
     <div class="game-controls">
         <button id="pauseBtn" class="btn btn-outline" onclick="togglePause()" disabled>⏸ 暂停</button>
+        <button id="soundToggleBtn" class="btn btn-outline" onclick="toggleSoundBtn()">🔊 音效</button>
         <button class="btn btn-outline" onclick="restartGame()">🔄 重新开始</button>
         <a href="{{ url_for('main.index') }}" class="btn btn-outline">🏠 返回首页</a>
     </div>
 
-    <!-- ===== 键盘说明 ===== -->
+    <!-- ===== 键盘说明（B岗增强：下滑操作提示） ===== -->
     <div class="key-guide">
         <span class="key">空格 / ↑</span> 跳跃 &nbsp;
         <span class="key">P</span> 暂停/继续 &nbsp;
-        <span class="key">R</span> 重新开始
+        <span class="key">R</span> 重新开始 &nbsp;
+        <span class="key">↓</span> 下滑
     </div>
 </div>
 {% endblock %}
@@ -87,4 +117,8 @@
 {% block extra_js %}
 <!-- 加载游戏脚本 -->
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+<script>
+// 游戏结束时更新难度显示
+const originalTriggerGameOver = window.triggerGameOver;
+</script>
 {% endblock %}
