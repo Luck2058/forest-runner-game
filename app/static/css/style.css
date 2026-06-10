@@ -956,6 +956,42 @@ img { max-width: 100%; }
     background: linear-gradient(135deg, #D97706, #B45309);
 }
 
+.btn-trial {
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: var(--white) !important;
+    border: none;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 4px;
+}
+.btn-trial:hover {
+    background: linear-gradient(135deg, #2563EB, #1E40AF);
+}
+
+.skin-action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+.trial-hint {
+    font-size: 0.75rem;
+    color: #3B82F6;
+    margin-top: 2px;
+    font-weight: bold;
+}
+
+.trial-used {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-top: 4px;
+}
+
 .shop-footer {
     display: flex;
     justify-content: center;

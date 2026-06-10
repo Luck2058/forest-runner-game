@@ -33,6 +33,19 @@ function submitScore() {
     .then(data => {
         if (data.success) {
             console.log('[成绩] 提交成功:', data.message);
+
+            // 更新试玩状态
+            if (typeof data.trial_remaining !== 'undefined') {
+                const trialHud = document.getElementById('trialHud');
+                const trialDisplay = document.getElementById('trialDisplay');
+                if (trialHud && trialDisplay) {
+                    if (data.trial_remaining > 0) {
+                        trialDisplay.textContent = '剩余' + data.trial_remaining + '局';
+                    } else {
+                        trialHud.style.display = 'none';
+                    }
+                }
+            }
         } else {
             console.warn('[成绩] 服务器返回异常:', data);
         }

@@ -16,6 +16,35 @@ user_skins = db.Table(
 )
 
 
+# 默认试玩次数
+TRIAL_ROUNDS = 5
+
+
+class SkinTrial(db.Model):
+    """皮肤试玩记录：追踪用户对每个未购买皮肤的试玩剩余次数"""
+
+    __tablename__ = 'skin_trials'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, comment='用户 ID')
+    skin_id = db.Column(db.Integer, db.ForeignKey('skins.id'), nullable=False, comment='皮肤 ID')
+    remaining = db.Column(db.Integer, default=TRIAL_ROUNDS, comment='剩余试玩次数')
+    is_trialing = db.Column(db.SmallInteger, default=0, comment='是否正在试玩装备中(0否1是)')
+
+    # 唯一约束：每个用户对每个皮肤只有一条试玩记录
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'skin_id', name='uq_user_skin_trial'),
+    )
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'skin_id': self.skin_id,
+            'remaining': self.remaining,
+            'is_trialing': bool(self.is_trialing),
+        }
+
+
 class Skin(db.Model):
     """皮肤模型"""
 

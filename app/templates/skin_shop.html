@@ -31,14 +31,29 @@
             <div class="skin-actions">
                 {% if skin.id == current_skin_id %}
                     <span class="skin-badge equipped-badge">✅ 使用中</span>
+                    {% if skin.id not in owned_ids and skin.price > 0 %}
+                        {% set trial = trial_info.get(skin.id, {}) %}
+                        <p class="trial-hint">⏳ 试玩剩余 {{ trial.get('remaining', 5) }} 局</p>
+                    {% endif %}
                 {% elif skin.id in owned_ids %}
                     <button class="btn btn-sm btn-primary" onclick="equipSkin({{ skin.id }})">装备</button>
                 {% elif skin.price == 0 %}
                     <button class="btn btn-sm btn-primary" onclick="buySkin({{ skin.id }})">免费领取</button>
                 {% else %}
-                    <button class="btn btn-sm btn-gold" onclick="buySkin({{ skin.id }})">
-                        💰 {{ skin.price }} 购买
-                    </button>
+                    {% set trial = trial_info.get(skin.id, {}) %}
+                    {% set remaining = trial.get('remaining', 5) %}
+                    <div class="skin-action-group">
+                        <button class="btn btn-sm btn-gold" onclick="buySkin({{ skin.id }})">
+                            💰 {{ skin.price }} 购买
+                        </button>
+                        {% if remaining > 0 %}
+                            <button class="btn btn-sm btn-trial" onclick="trialEquipSkin({{ skin.id }})">
+                                🎮 试玩({{ remaining }}局)
+                            </button>
+                        {% else %}
+                            <span class="trial-used">试玩已用完</span>
+                        {% endif %}
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -89,7 +104,7 @@ function buySkin(skinId) {
     .catch(() => alert('网络错误，请重试'));
 }
 
-/** 装备皮肤 */
+/** 装备已拥有的皮肤 */
 function equipSkin(skinId) {
     fetch('/game/api/skin/equip', {
         method: 'POST',
@@ -103,6 +118,25 @@ function equipSkin(skinId) {
             location.reload();
         } else {
             alert(data.message || '装备失败');
+        }
+    })
+    .catch(() => alert('网络错误，请重试'));
+}
+
+/** 试玩装备皮肤 */
+function trialEquipSkin(skinId) {
+    fetch('/game/api/skin/trial-equip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skin_id: skinId }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message || '试玩装备失败');
         }
     })
     .catch(() => alert('网络错误，请重试'));

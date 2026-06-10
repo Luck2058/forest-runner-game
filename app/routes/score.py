@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 from app import db
 from app.models.score import Score
 from app.models.user import User
+from app.models.skin import SkinTrial
 
 # 创建成绩蓝图，url 前缀为 /score
 score_bp = Blueprint('score', __name__)
@@ -105,17 +106,43 @@ def submit_score():
     if user:
         user.coin_balance = (user.coin_balance or 0) + coins
 
+        # 如果当前装备的是试玩皮肤，扣减试玩次数
+        if user.skin_id:
+            trial = SkinTrial.query.filter_by(
+                user_id=user_id, skin_id=user.skin_id, is_trialing=1
+            ).first()
+            if trial and trial.remaining > 0:
+                trial.remaining -= 1
+                # 试玩次数用完后，自动换回默认皮肤
+                if trial.remaining <= 0:
+                    trial.is_trialing = 0
+                    from app.models.skin import Skin
+                    default_skin = Skin.query.filter_by(is_default=1).first()
+                    if default_skin:
+                        user.skin_id = default_skin.id
+
     db.session.commit()
 
     # 判断是否刷新个人最高分
     is_new_record = (score_value > old_best)
 
-    return jsonify({
+    # 构建返回信息
+    result = {
         'success':        True,
         'message':        '成绩已保存！' + ('🎉 新纪录！' if is_new_record else ''),
         'is_new_record':  is_new_record,
-        'score_id':       new_score.id
-    })
+        'score_id':       new_score.id,
+    }
+
+    # 检查是否试玩皮肤被扣减
+    if user and user.skin_id:
+        trial = SkinTrial.query.filter_by(user_id=user_id, skin_id=user.skin_id).first()
+        if trial:
+            result['trial_remaining'] = trial.remaining
+            if trial.remaining <= 0:
+                result['message'] += ' ⚠️ 试玩次数已用完，已切换回默认皮肤'
+
+    return jsonify(result)
 
 
 @score_bp.route('/my-scores')

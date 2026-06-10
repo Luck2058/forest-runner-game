@@ -9,7 +9,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, flash,
 from functools import wraps
 from app import db
 from app.models.user import User
-from app.models.skin import Skin
+from app.models.skin import Skin, SkinTrial, TRIAL_ROUNDS
 
 # 创建游戏蓝图，url 前缀为 /game
 game_bp = Blueprint('game', __name__)
@@ -97,6 +97,12 @@ def skin_shop():
         db.session.commit()
         owned_ids.add(default_skin.id)
 
+    # 获取试玩信息：{skin_id: {remaining, is_trialing}}
+    trial_records = SkinTrial.query.filter_by(user_id=user_id).all()
+    trial_info = {}
+    for t in trial_records:
+        trial_info[t.skin_id] = {'remaining': t.remaining, 'is_trialing': bool(t.is_trialing)}
+
     return render_template(
         'skin_shop.html',
         skins=all_skins,
@@ -104,6 +110,7 @@ def skin_shop():
         owned_ids=owned_ids,
         current_skin_id=user.skin_id,
         coin_balance=user.coin_balance,
+        trial_info=trial_info,
     )
 
 
@@ -140,6 +147,67 @@ def equip_skin():
     })
 
 
+@game_bp.route('/api/skin/trial-equip', methods=['POST'])
+@login_required
+def trial_equip_skin():
+    """试玩装备皮肤 API（未购买的皮肤可试玩5局）"""
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
+    data = request.get_json(silent=True) or {}
+    skin_id = data.get('skin_id')
+
+    if not skin_id:
+        return jsonify({'success': False, 'message': '参数错误'}), 400
+
+    skin = Skin.query.get(skin_id)
+    if not skin:
+        return jsonify({'success': False, 'message': '皮肤不存在'}), 404
+
+    # 已拥有的皮肤走正常装备流程
+    owned_ids = {s.id for s in user.owned_skins}
+    if skin_id in owned_ids:
+        user.skin_id = skin_id
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': f'已装备「{skin.name}」',
+            'skin_id': skin_id,
+        })
+
+    # 免费皮肤不能试玩，直接领取
+    if skin.price == 0:
+        user.owned_skins.append(skin)
+        user.skin_id = skin_id
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': f'已免费领取并装备「{skin.name}」',
+            'skin_id': skin_id,
+        })
+
+    # 查找或创建试玩记录
+    trial = SkinTrial.query.filter_by(user_id=user_id, skin_id=skin_id).first()
+    if not trial:
+        trial = SkinTrial(user_id=user_id, skin_id=skin_id, remaining=TRIAL_ROUNDS, is_trialing=1)
+        db.session.add(trial)
+    elif trial.remaining <= 0:
+        return jsonify({'success': False, 'message': f'「{skin.name}」试玩次数已用完，请购买解锁'}), 403
+    else:
+        trial.is_trialing = 1
+
+    # 装备试玩皮肤
+    user.skin_id = skin_id
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'试玩装备「{skin.name}」，剩余 {trial.remaining} 局',
+        'skin_id': skin_id,
+        'trial_remaining': trial.remaining,
+    })
+
+
 @game_bp.route('/api/skin/buy', methods=['POST'])
 @login_required
 def buy_skin():
@@ -172,6 +240,12 @@ def buy_skin():
     # 扣除金币 + 添加皮肤
     user.coin_balance -= skin.price
     user.owned_skins.append(skin)
+
+    # 清除该皮肤的试玩记录（已购买不再需要）
+    trial = SkinTrial.query.filter_by(user_id=user_id, skin_id=skin_id).first()
+    if trial:
+        db.session.delete(trial)
+
     db.session.commit()
 
     return jsonify({
@@ -192,7 +266,19 @@ def get_user_skin():
     if not skin:
         skin = Skin.query.filter_by(is_default=1).first()
 
+    # 检查是否为试玩状态
+    is_trial = False
+    trial_remaining = 0
+    owned_ids = {s.id for s in user.owned_skins}
+    if skin and skin.id not in owned_ids and skin.price > 0:
+        trial = SkinTrial.query.filter_by(user_id=user_id, skin_id=skin.id).first()
+        if trial:
+            is_trial = True
+            trial_remaining = trial.remaining
+
     return jsonify({
         'success': True,
         'skin': skin.to_dict() if skin else None,
+        'is_trial': is_trial,
+        'trial_remaining': trial_remaining,
     })

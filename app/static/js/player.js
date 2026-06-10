@@ -38,6 +38,16 @@ function loadPlayerSkin() {
                     });
                 }
                 console.log('[皮肤] 已装备:', playerSkin.name);
+
+                // 试玩状态提示
+                if (data.is_trial) {
+                    const trialHud = document.getElementById('trialHud');
+                    const trialDisplay = document.getElementById('trialDisplay');
+                    if (trialHud && trialDisplay) {
+                        trialHud.style.display = '';
+                        trialDisplay.textContent = '剩余' + data.trial_remaining + '局';
+                    }
+                }
             }
         })
         .catch(() => {
