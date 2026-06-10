@@ -1,5 +1,5 @@
 """
-app/models/score.py —— 成绩数据模型
+app/models/score.py -- 成绩数据模型
 对应数据库 scores 表
 C 岗（肖盼）补全：get_global_ranking / get_user_scores /
                    get_user_best_score / get_statistics / to_dict
