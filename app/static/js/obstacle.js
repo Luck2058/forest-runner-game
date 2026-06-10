@@ -1,11 +1,13 @@
 /**
- * obstacle.js —— 障碍物 & 金币模块
+ * obstacle.js —— 障碍物 & 金币 & 背景模块
  *
  * 职责：
  *   - 障碍物数组管理（地面树桩 + 空中飞鸟两种类型）
  *   - 金币数组管理（生成、收集、绘制）
  *   - 碰撞检测调用
  *   - 障碍物/金币/背景的绘制
+ *   - 【B岗新增】粒子特效系统（金币收集 / 碰撞爆炸）
+ *   - 【B岗新增】背景增强（云朵、山丘视差）
  *
  * 依赖：CONFIG、player、gameState、frameCount、gameSpeed、ctx、canvas
  */
@@ -22,6 +24,134 @@ let nextCoinFrame = 0;       // 下次生成金币的帧数
 let bgOffset = 0;            // 背景滚动偏移量
 
 // ============================================================
+// 【B岗新增】粒子特效系统
+// ============================================================
+let particles = [];
+
+/** 生成粒子爆发（金币收集 / 碰撞爆炸） */
+function spawnParticles(x, y, color, count, type) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * (type === 'coin' ? 4 : 6),
+            vy: (Math.random() - 0.5) * (type === 'coin' ? 4 : 8) - 2,
+            r: Math.max(1, Math.random() * (type === 'coin' ? 4 : 5)),
+            color: color,
+            life: 1.0,
+            decay: 0.02 + Math.random() * 0.03,
+            type: type || 'coin',
+        });
+    }
+}
+
+/** 更新并绘制所有粒子 */
+function updateAndDrawParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12;   // 微重力
+        p.life -= p.decay;
+
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+            continue;
+        }
+
+        ctx.globalAlpha = p.life;
+        if (p.type === 'coin') {
+            // 金币粒子：小星星形状
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            // 闪光
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(p.x - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // 碰撞粒子：不规则碎块
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+        }
+        ctx.globalAlpha = 1.0;
+    }
+}
+
+/** 初始化粒子系统 */
+function initParticles() {
+    particles = [];
+}
+
+// ============================================================
+// 【B岗新增】云朵 & 山丘背景
+// ============================================================
+let clouds = [];
+let hills  = [];
+
+/** 初始化云朵和山丘 */
+function initBackground() {
+    clouds = [];
+    for (let i = 0; i < 5; i++) {
+        clouds.push({
+            x: Math.random() * canvas.width,
+            y: 20 + Math.random() * 60,
+            w: 50 + Math.random() * 60,
+            speed: 0.15 + Math.random() * 0.25,
+            opacity: 0.3 + Math.random() * 0.4,
+        });
+    }
+    hills = [];
+    for (let i = 0; i < 3; i++) {
+        hills.push({
+            x: i * 300,
+            w: 200 + Math.random() * 150,
+            h: 40 + Math.random() * 40,
+            color: i === 1 ? 'rgba(45, 106, 79, 0.25)' : 'rgba(82, 183, 136, 0.2)',
+        });
+    }
+}
+
+/** 绘制云朵 */
+function drawClouds() {
+    clouds.forEach(c => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${c.opacity})`;
+        // 云朵由3个重叠椭圆组成
+        ctx.beginPath();
+        ctx.ellipse(c.x, c.y, c.w * 0.4, c.w * 0.22, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(c.x - c.w * 0.25, c.y + c.w * 0.05, c.w * 0.3, c.w * 0.18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(c.x + c.w * 0.25, c.y + c.w * 0.05, c.w * 0.28, c.w * 0.16, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 移动
+        c.x -= c.speed;
+        if (c.x + c.w < 0) {
+            c.x = canvas.width + c.w;
+            c.y = 20 + Math.random() * 60;
+        }
+    });
+}
+
+/** 绘制山丘（视差滚动） */
+function drawHills() {
+    hills.forEach(h => {
+        const x = ((h.x - bgOffset * 0.15) % (canvas.width + h.w)) - h.w * 0.5;
+        ctx.fillStyle = h.color;
+        ctx.beginPath();
+        ctx.moveTo(x, CONFIG.GROUND_Y);
+        ctx.quadraticCurveTo(x + h.w / 2, CONFIG.GROUND_Y - h.h, x + h.w, CONFIG.GROUND_Y);
+        ctx.closePath();
+        ctx.fill();
+    });
+}
+
+// ============================================================
 // 初始化 / 重置（供 game.js 的 initGame() 调用）
 // ============================================================
 function initObstacles() {
@@ -30,6 +160,8 @@ function initObstacles() {
     bgOffset      = 0;
     nextObsFrame  = randInt(CONFIG.OBS_INTERVAL_MIN, CONFIG.OBS_INTERVAL_MAX);
     nextCoinFrame = randInt(CONFIG.COIN_INTERVAL_MIN, CONFIG.COIN_INTERVAL_MAX);
+    initParticles();
+    initBackground();
 }
 
 // ============================================================
@@ -76,6 +208,10 @@ function updateObstacles() {
 
         // 碰撞检测：玩家 vs 障碍物（AABB矩形碰撞）
         if (rectsCollide(player, obstacles[i])) {
+            // 【B岗】碰撞时生成爆炸粒子
+            spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#ff4444', 12, 'crash');
+            // 【B岗】播放碰撞音效
+            if (typeof playSFX === 'function') playSFX('crash');
             return true;   // 碰撞！游戏结束
         }
 
@@ -113,6 +249,10 @@ function updateCoins() {
 
         // 玩家收集金币（矩形 vs 圆形碰撞）
         if (rectCircleCollide(player, coinList[i])) {
+            // 【B岗】金币收集粒子
+            spawnParticles(coinList[i].x, coinList[i].y, '#FFE066', 8, 'coin');
+            // 【B岗】播放金币音效
+            if (typeof playSFX === 'function') playSFX('coin');
             collected++;
             coinList.splice(i, 1);
             continue;
@@ -126,8 +266,15 @@ function updateCoins() {
     return collected;
 }
 
-/** 绘制单个金币 */
+/** 【B岗修改】绘制单个金币 —— 优先用 SVG 素材 */
 function drawCoin(c) {
+    const sprite = SpriteLoader.get('coin');
+    if (sprite) {
+        ctx.drawImage(sprite, c.x - c.r, c.y - c.r, c.r * 2, c.r * 2);
+        return;
+    }
+
+    // 降级：Canvas 绘制
     // 外圈光晕
     ctx.beginPath();
     ctx.arc(c.x, c.y, c.r + 3, 0, Math.PI * 2);
@@ -170,7 +317,16 @@ function drawObstacle(obs) {
 }
 
 // ---- 地面障碍物（树桩/石头）—— 需要跳跃越过 ----
+
+/** 【B岗修改】地面障碍物 —— 优先用 SVG 素材 */
 function drawGroundObstacle(obs) {
+    const sprite = SpriteLoader.get('obstacle_stump');
+    if (sprite) {
+        ctx.drawImage(sprite, obs.x, obs.y, obs.w, obs.h);
+        return;
+    }
+
+    // 降级：Canvas 绘制
     // 树桩身体（渐变棕色）
     const grad = ctx.createLinearGradient(obs.x, obs.y, obs.x + obs.w, obs.y);
     grad.addColorStop(0,   '#8B5E3C');
@@ -199,7 +355,18 @@ function drawGroundObstacle(obs) {
 }
 
 // ---- 空中障碍物（飞鸟/树枝）—— 需要下滑躲避 ----
+
+/** 【B岗修改】空中障碍物 —— 优先用 SVG 素材（飞鸟） */
 function drawAirObstacle(obs) {
+    const sprite = SpriteLoader.get('obstacle_bird');
+    if (sprite) {
+        // 翅膀扇动效果：上下微调
+        const wingFlap = Math.sin(frameCount * 0.3) * 3;
+        ctx.drawImage(sprite, obs.x, obs.y + wingFlap, obs.w, obs.h);
+        return;
+    }
+
+    // 降级：Canvas 绘制
     const cx = obs.x + obs.w / 2;   // 中心 X
     const cy = obs.y + obs.h / 2;   // 中心 Y
 

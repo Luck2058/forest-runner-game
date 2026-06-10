@@ -3,6 +3,8 @@
  *
  * 必须在所有其他游戏模块之前加载（第一个 <script> 标签）
  * 提供 CONFIG 常量 + randInt / rectsCollide / rectCircleCollide 工具函数
+ *
+ * 【B岗修改】新增：图片素材路径配置、SpriteLoader 图片加载管理器
  */
 
 // ============================================================
@@ -63,6 +65,61 @@ const CONFIG = {
     AIR_OBS_H_MIN:      25,
     AIR_OBS_H_MAX:      35,
     AIR_OBS_GROUND_GAP: 55,     // 空中障碍物离地面最小距离
+
+    // ---- 【B岗新增】图片素材路径 ----
+    SPRITE_PLAYER:         '/static/images/player.svg',
+    SPRITE_OBSTACLE_STUMP: '/static/images/obstacle_stump.svg',
+    SPRITE_OBSTACLE_STONE: '/static/images/obstacle_stone.svg',
+    SPRITE_OBSTACLE_BIRD:  '/static/images/obstacle_bird.svg',
+    SPRITE_COIN:           '/static/images/coin.svg',
+    SPRITE_POWERUP_MAGNET: '/static/images/powerup_magnet.svg',
+};
+
+// ============================================================
+// 【B岗新增】SpriteLoader —— 图片素材加载管理器
+// 加载 SVG/PNG 图片，加载失败时返回 null（由各绘制模块降级到 Canvas 绘制）
+// ============================================================
+const SpriteLoader = {
+    _cache: {},   // 已加载的图片缓存
+
+    /** 加载一张图片，返回 Promise<Image> */
+    load(key, src) {
+        return new Promise((resolve) => {
+            if (this._cache[key]) {
+                resolve(this._cache[key]);
+                return;
+            }
+            const img = new Image();
+            img.onload = () => {
+                this._cache[key] = img;
+                resolve(img);
+            };
+            img.onerror = () => {
+                console.warn(`[素材] 加载失败: ${key} (${src})，将降级为Canvas绘制`);
+                this._cache[key] = null;   // null 表示加载失败
+                resolve(null);
+            };
+            img.src = src;
+        });
+    },
+
+    /** 获取已缓存图片（同步），无则返回 null */
+    get(key) {
+        return this._cache[key] || null;
+    },
+
+    /** 批量加载所有游戏素材，返回 Promise */
+    loadAll() {
+        const tasks = [
+            this.load('player',         CONFIG.SPRITE_PLAYER),
+            this.load('obstacle_stump', CONFIG.SPRITE_OBSTACLE_STUMP),
+            this.load('obstacle_stone', CONFIG.SPRITE_OBSTACLE_STONE),
+            this.load('obstacle_bird',  CONFIG.SPRITE_OBSTACLE_BIRD),
+            this.load('coin',           CONFIG.SPRITE_COIN),
+            this.load('powerup_magnet', CONFIG.SPRITE_POWERUP_MAGNET),
+        ];
+        return Promise.all(tasks);
+    }
 };
 
 // ============================================================
