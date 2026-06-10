@@ -52,12 +52,13 @@ class Score(db.Model):
         # 避免循环导入，在方法内部导入 User
         from app.models.user import User
 
-        # 子查询：每个用户的最高分
+        # 子查询：每个用户的最高分/最高金币/最大距离
         subq = (
             db.session.query(
                 cls.user_id,
                 func.max(cls.score).label('best_score'),
-                func.max(cls.coins).label('best_coins')
+                func.max(cls.coins).label('best_coins'),
+                func.max(cls.distance).label('best_distance')
             )
             .group_by(cls.user_id)
             .subquery()
@@ -69,6 +70,7 @@ class Score(db.Model):
                 subq.c.user_id,
                 subq.c.best_score,
                 subq.c.best_coins,
+                subq.c.best_distance,
                 User.nickname,
                 User.username
             )
@@ -81,11 +83,12 @@ class Score(db.Model):
         result = []
         for i, row in enumerate(rows, start=1):
             result.append({
-                'rank':       i,
-                'user_id':    row.user_id,
-                'nickname':   row.nickname or row.username,
-                'best_score': row.best_score,
-                'best_coins': row.best_coins,
+                'rank':          i,
+                'user_id':       row.user_id,
+                'nickname':      row.nickname or row.username,
+                'best_score':    row.best_score,
+                'best_coins':    row.best_coins,
+                'distance':      row.best_distance,
             })
         return result
 
