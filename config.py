@@ -22,7 +22,7 @@ class Config:
     DB_HOST = os.environ.get('DB_HOST') or '127.0.0.1'
     DB_PORT = os.environ.get('DB_PORT') or '3306'
     DB_USER = os.environ.get('DB_USER') or 'root'
-    DB_PASSWORD = os.environ.get('DB_PASSWORD') or '123456'
+    DB_PASSWORD = os.environ.get('DB_PASSWORD') or ''
     DB_NAME = os.environ.get('DB_NAME') or 'forest_runner'
 
     SQLALCHEMY_DATABASE_URI = (
@@ -39,8 +39,6 @@ class Config:
 class DevelopmentConfig(Config):
     """开发环境配置"""
     DEBUG = True
-    # 开发阶段使用 SQLite，方便不装 MySQL 也能跑
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'dev_forest.db')}"
 
 
 class ProductionConfig(Config):

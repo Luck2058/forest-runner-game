@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}皮肤商店{% endblock %}
+
+{% block content %}
+<div class="skin-shop-page">
+
+    <div class="shop-header">
+        <h2>🎨 皮肤商店</h2>
+        <div class="coin-balance">
+            💰 金币余额：<strong id="coinBalance">{{ coin_balance }}</strong>
+        </div>
+    </div>
+
+    <div class="skin-grid">
+        {% for skin in skins %}
+        <div class="skin-card {% if skin.id == current_skin_id %}equipped{% elif skin.id in owned_ids %}owned{% else %}locked{% endif %}"
+             data-skin-id="{{ skin.id }}" data-price="{{ skin.price }}">
+
+            <!-- 皮肤预览 -->
+            <div class="skin-preview" id="preview-{{ skin.id }}">
+                <canvas id="skinCanvas-{{ skin.id }}" width="80" height="100"></canvas>
+            </div>
+
+            <!-- 皮肤信息 -->
+            <div class="skin-info">
+                <h3 class="skin-name">{{ skin.name }}</h3>
+                <p class="skin-desc">{{ skin.description }}</p>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="skin-actions">
+                {% if skin.id == current_skin_id %}
+                    <span class="skin-badge equipped-badge">✅ 使用中</span>
+                {% elif skin.id in owned_ids %}
+                    <button class="btn btn-sm btn-primary" onclick="equipSkin({{ skin.id }})">装备</button>
+                {% elif skin.price == 0 %}
+                    <button class="btn btn-sm btn-primary" onclick="buySkin({{ skin.id }})">免费领取</button>
+                {% else %}
+                    <button class="btn btn-sm btn-gold" onclick="buySkin({{ skin.id }})">
+                        💰 {{ skin.price }} 购买
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="shop-footer">
+        <a href="{{ url_for('game.game') }}" class="btn btn-start">🎮 返回游戏</a>
+        <a href="{{ url_for('game.profile') }}" class="btn btn-outline">👤 个人中心</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 页面加载后渲染所有皮肤预览
+window.addEventListener('DOMContentLoaded', function() {
+    const skinData = {{ skins | map(attribute='to_dict') | list | tojson }};
+
+    skinData.forEach(skin => {
+        const canvas = document.getElementById(`skinCanvas-${skin.id}`);
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            drawSkinPreview(ctx, skin, 80, 100);
+        }
+    });
+});
+
+/** 绘制皮肤预览（Canvas 降级绘制，用皮肤配色） */
+function drawSkinPreview(ctx, skin, w, h) {
+    const primary = skin.primary_color;
+    const secondary = skin.secondary_color;
+    const accent = skin.accent_color;
+
+    // 身体
+    ctx.fillStyle = primary;
+    ctx.beginPath();
+    ctx.roundRect(w * 0.2, h * 0.35, w * 0.5, h * 0.4, 8);
+    ctx.fill();
+
+    // 肚子
+    ctx.fillStyle = secondary;
+    ctx.beginPath();
+    ctx.roundRect(w * 0.28, h * 0.42, w * 0.35, h * 0.28, 5);
+    ctx.fill();
+
+    // 小背心
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.roundRect(w * 0.22, h * 0.38, w * 0.47, h * 0.2, 3);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // 头部
+    ctx.fillStyle = primary;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h * 0.22, w * 0.28, h * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 脸部
+    ctx.fillStyle = secondary;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.5, h * 0.25, w * 0.2, h * 0.14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 耳朵
+    ctx.fillStyle = primary;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.25, h * 0.1);
+    ctx.lineTo(w * 0.18, h * 0.25);
+    ctx.lineTo(w * 0.33, h * 0.2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(w * 0.75, h * 0.1);
+    ctx.lineTo(w * 0.82, h * 0.25);
+    ctx.lineTo(w * 0.67, h * 0.2);
+    ctx.fill();
+
+    // 眼睛
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.4, h * 0.2, 5, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(w * 0.6, h * 0.2, 5, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 瞳孔
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath();
+    ctx.arc(w * 0.42, h * 0.2, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(w * 0.62, h * 0.2, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 眼睛高光
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(w * 0.43, h * 0.18, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(w * 0.63, h * 0.18, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 腮红
+    ctx.fillStyle = 'rgba(255,150,150,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.3, h * 0.27, 5, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(w * 0.7, h * 0.27, 5, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 腿
+    ctx.fillStyle = primary;
+    ctx.beginPath();
+    ctx.roundRect(w * 0.25, h * 0.72, w * 0.15, h * 0.16, 4);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(w * 0.52, h * 0.72, w * 0.15, h * 0.16, 4);
+    ctx.fill();
+
+    // 尾巴
+    ctx.fillStyle = primary;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.1, h * 0.55, 10, 14, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = secondary;
+    ctx.beginPath();
+    ctx.ellipse(w * 0.08, h * 0.55, 5, 8, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/** 购买皮肤 */
+function buySkin(skinId) {
+    if (!confirm('确认购买该皮肤？')) return;
+
+    fetch('/game/api/skin/buy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skin_id: skinId }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message || '购买失败');
+        }
+    })
+    .catch(() => alert('网络错误，请重试'));
+}
+
+/** 装备皮肤 */
+function equipSkin(skinId) {
+    fetch('/game/api/skin/equip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skin_id: skinId }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message || '装备失败');
+        }
+    })
+    .catch(() => alert('网络错误，请重试'));
+}
+</script>
+{% endblock %}

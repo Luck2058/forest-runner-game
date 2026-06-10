@@ -62,5 +62,8 @@ def create_app(config_name='default'):
     # 在应用上下文中创建数据库表（开发阶段使用）
     with app.app_context():
         db.create_all()
+        # 初始化预置皮肤数据
+        from app.models.skin import seed_skins
+        seed_skins()
 
     return app

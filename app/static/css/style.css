@@ -834,3 +834,138 @@ img { max-width: 100%; }
     .hero-section { min-height: 400px; }
     .features-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ============================================================
+   皮肤商店
+   ============================================================ */
+.skin-shop-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.shop-header h2 {
+    color: var(--green-dark);
+    font-size: 1.6rem;
+}
+
+.coin-balance {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    padding: 0.5rem 1.2rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    color: #92400E;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.skin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.skin-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    text-align: center;
+}
+
+.skin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(45, 106, 79, 0.2);
+}
+
+.skin-card.equipped {
+    border-color: var(--green-main);
+    background: var(--green-pale);
+}
+
+.skin-card.owned {
+    border-color: var(--green-light);
+}
+
+.skin-card.locked {
+    opacity: 0.85;
+}
+
+.skin-preview {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.8rem;
+}
+
+.skin-preview canvas {
+    border-radius: 8px;
+    background: var(--bg-page);
+}
+
+.skin-info {
+    margin-bottom: 0.8rem;
+}
+
+.skin-name {
+    font-size: 1.1rem;
+    color: var(--green-dark);
+    margin-bottom: 0.3rem;
+}
+
+.skin-desc {
+    font-size: 0.85rem;
+    color: var(--text-mid);
+}
+
+.skin-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.skin-badge {
+    display: inline-block;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.equipped-badge {
+    background: var(--green-main);
+    color: var(--white);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: var(--white) !important;
+    border: none;
+    font-weight: bold;
+}
+
+.btn-gold:hover {
+    background: linear-gradient(135deg, #D97706, #B45309);
+}
+
+.shop-footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.empty-tip {
+    text-align: center;
+    color: var(--text-mid);
+    padding: 2rem;
+    font-size: 0.95rem;
+}

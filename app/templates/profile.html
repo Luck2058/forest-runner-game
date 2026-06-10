@@ -8,7 +8,7 @@
     <div class="profile-card">
         <div class="profile-avatar">🦊</div>
         <div class="profile-info">
-            <h2 class="profile-name">{{ username }}</h2>
+            <h2 class="profile-name">{{ user.nickname or user.username }}</h2>
             <p class="profile-tag">🌲 森林探险家</p>
         </div>
     </div>
@@ -31,9 +31,9 @@
             <div class="stat-label">游戏次数</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">📏</div>
-            <div class="stat-value" id="bestDist">-</div>
-            <div class="stat-label">最远距离</div>
+            <div class="stat-icon">👛</div>
+            <div class="stat-value">{{ user.coin_balance or 0 }}</div>
+            <div class="stat-label">金币余额</div>
         </div>
     </div>
 
@@ -47,6 +47,7 @@
 
     <div class="profile-actions">
         <a href="{{ url_for('game.game') }}" class="btn btn-start">🎮 再来一局</a>
+        <a href="{{ url_for('game.skin_shop') }}" class="btn btn-outline">🎨 皮肤商店</a>
         <a href="{{ url_for('score.rank') }}" class="btn btn-rank">🏆 查看排行</a>
     </div>
 </div>

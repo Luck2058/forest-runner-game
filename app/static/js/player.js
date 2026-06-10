@@ -6,11 +6,44 @@
  *   - 跳跃逻辑（支持二段跳）
  *   - 下滑逻辑（按住 ↓ 趴下躲避空中障碍物）
  *   - 玩家绘制（站立/跳跃/下滑三种姿态）
+ *   - 皮肤系统：根据后端返回的皮肤配色渲染角色
  *
  * 依赖：CONFIG（全局常量）、gameState（游戏状态）
  *
  * 【B岗修改】优先使用 SVG 素材绘制，素材加载失败时降级为 Canvas 绘制
+ * 【皮肤系统】Canvas 降级绘制使用皮肤配色（primary/secondary/accent）
  */
+
+// ============================================================
+// 皮肤配色（默认值，页面加载时从后端获取覆盖）
+// ============================================================
+let playerSkin = {
+    primary_color:   '#D85A30',   // 主体色
+    secondary_color: '#FAECE7',   // 肚皮/面部色
+    accent_color:    '#2d6a4f',   // 背心色
+    sprite_path:     '/static/images/player.svg',
+};
+
+/** 从后端加载用户当前装备的皮肤 */
+function loadPlayerSkin() {
+    fetch('/game/api/user/skin')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.skin) {
+                playerSkin = data.skin;
+                // 如果皮肤有自定义 SVG，重新加载
+                if (playerSkin.sprite_path) {
+                    SpriteLoader.load('player', playerSkin.sprite_path).then(() => {
+                        console.log('[皮肤] 自定义素材加载完成');
+                    });
+                }
+                console.log('[皮肤] 已装备:', playerSkin.name);
+            }
+        })
+        .catch(() => {
+            console.warn('[皮肤] 加载失败，使用默认配色');
+        });
+}
 
 // ============================================================
 // 玩家对象（暴露给其他模块使用）
@@ -159,9 +192,9 @@ function drawPlayerSliding(p) {
         return;
     }
 
-    // 降级：Canvas 绘制
-    // 身体：扁平的深绿色椭圆
-    ctx.fillStyle = '#2d6a4f';
+    // 降级：Canvas 绘制（使用皮肤配色）
+    // 身体：扁平椭圆
+    ctx.fillStyle = playerSkin.primary_color;
     ctx.beginPath();
     ctx.roundRect(p.x - 5, CONFIG.GROUND_Y - slideH, slideW, slideH, 5);
     ctx.fill();
@@ -172,9 +205,11 @@ function drawPlayerSliding(p) {
     ctx.ellipse(p.x + slideW * 0.7, CONFIG.GROUND_Y - slideH * 0.5, 6, 3, -0.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // 帽子也跟着趴下
-    ctx.fillStyle = '#40916c';
+    // 背心
+    ctx.fillStyle = playerSkin.accent_color;
+    ctx.globalAlpha = 0.7;
     ctx.fillRect(p.x + slideW * 0.3, CONFIG.GROUND_Y - slideH - 4, slideW * 0.5, 5);
+    ctx.globalAlpha = 1;
 }
 
 /** 绘制站立/跳跃姿态 */
@@ -186,35 +221,47 @@ function drawPlayerStanding(p) {
         return;
     }
 
-    // 降级：Canvas 绘制
-    // 身体：深绿色圆角矩形
-    ctx.fillStyle = '#2d6a4f';
+    // 降级：Canvas 绘制（使用皮肤配色）
+    const prim = playerSkin.primary_color;
+    const sec  = playerSkin.secondary_color;
+    const acc  = playerSkin.accent_color;
+
+    // 身体
+    ctx.fillStyle = prim;
     ctx.beginPath();
     ctx.roundRect(p.x, p.y, p.w, p.h, 6);
     ctx.fill();
 
+    // 肚子
+    ctx.fillStyle = sec;
+    ctx.beginPath();
+    ctx.roundRect(p.x + p.w * 0.15, p.y + p.h * 0.3, p.w * 0.7, p.h * 0.5, 5);
+    ctx.fill();
+
+    // 小背心
+    ctx.fillStyle = acc;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.roundRect(p.x + 2, p.y + p.h * 0.2, p.w - 4, p.h * 0.3, 3);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
     // 眼睛（白色）
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.ellipse(p.x + p.w * 0.65, p.y + p.h * 0.25, 7, 7, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x + p.w * 0.65, p.y + p.h * 0.2, 7, 7, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // 瞳孔
     ctx.fillStyle = '#1a1a2e';
     ctx.beginPath();
-    ctx.ellipse(p.x + p.w * 0.67, p.y + p.h * 0.25, 4, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x + p.w * 0.67, p.y + p.h * 0.2, 4, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // 笑脸弧线
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(p.x + p.w * 0.5, p.y + p.h * 0.55, 8, 0, Math.PI);
+    ctx.arc(p.x + p.w * 0.5, p.y + p.h * 0.45, 8, 0, Math.PI);
     ctx.stroke();
-
-    // 帽子
-    ctx.fillStyle = '#40916c';
-    ctx.fillRect(p.x + 4, p.y - 8, p.w - 8, 8);
-    ctx.fillStyle = '#52b788';
-    ctx.fillRect(p.x - 4, p.y - 4, p.w + 8, 4);
 }

@@ -99,6 +99,12 @@ def submit_score():
         play_time  = play_time
     )
     db.session.add(new_score)
+
+    # 将本局金币累加到用户余额
+    user = User.query.get(user_id)
+    if user:
+        user.coin_balance = (user.coin_balance or 0) + coins
+
     db.session.commit()
 
     # 判断是否刷新个人最高分

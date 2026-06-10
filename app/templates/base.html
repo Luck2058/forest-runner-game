@@ -29,6 +29,7 @@
         <a href="{{ url_for('score.rank') }}" class="nav-link">🏆 排行榜</a>
 
         {% if session.get('username') %}
+            <a href="{{ url_for('game.skin_shop') }}" class="nav-link">🎨 皮肤</a>
             <a href="{{ url_for('game.profile') }}" class="nav-link">👤 {{ session['username'] }}</a>
             <a href="{{ url_for('auth.logout') }}" class="nav-link nav-logout">退出</a>
         {% else %}

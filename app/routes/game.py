@@ -1,11 +1,15 @@
 """
 app/routes/game.py —— 游戏页面蓝图
-负责：游戏页面渲染、登录保护
+负责：游戏页面渲染、登录保护、皮肤商店
 C 岗（肖盼）完成：登录后才能进入游戏，未登录跳转到登录页
+新增：皮肤商店（查看/购买/装备皮肤）
 """
 
-from flask import Blueprint, render_template, session, redirect, url_for, flash
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
 from functools import wraps
+from app import db
+from app.models.user import User
+from app.models.skin import Skin
 
 # 创建游戏蓝图，url 前缀为 /game
 game_bp = Blueprint('game', __name__)
@@ -68,3 +72,126 @@ def profile():
         best_score=best_score,
         total_coins=total_coins
     )
+
+
+@game_bp.route('/skins')
+@login_required
+def skin_shop():
+    """
+    皮肤商店页面
+    显示所有皮肤，标注已拥有/已装备状态
+    """
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
+    # 所有皮肤
+    all_skins = Skin.query.order_by(Skin.sort_order).all()
+
+    # 用户已拥有的皮肤 ID 集合
+    owned_ids = {s.id for s in user.owned_skins}
+
+    # 确保默认皮肤自动拥有
+    default_skin = Skin.query.filter_by(is_default=1).first()
+    if default_skin and default_skin.id not in owned_ids:
+        user.owned_skins.append(default_skin)
+        db.session.commit()
+        owned_ids.add(default_skin.id)
+
+    return render_template(
+        'skin_shop.html',
+        skins=all_skins,
+        owned_ids=owned_ids,
+        current_skin_id=user.skin_id,
+        coin_balance=user.coin_balance,
+    )
+
+
+@game_bp.route('/api/skin/equip', methods=['POST'])
+@login_required
+def equip_skin():
+    """装备皮肤 API"""
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
+    data = request.get_json(silent=True) or {}
+    skin_id = data.get('skin_id')
+
+    if not skin_id:
+        return jsonify({'success': False, 'message': '参数错误'}), 400
+
+    skin = Skin.query.get(skin_id)
+    if not skin:
+        return jsonify({'success': False, 'message': '皮肤不存在'}), 404
+
+    # 检查是否已拥有
+    owned_ids = {s.id for s in user.owned_skins}
+    if skin_id not in owned_ids:
+        return jsonify({'success': False, 'message': '你还没有这款皮肤'}), 403
+
+    # 装备
+    user.skin_id = skin_id
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'已装备「{skin.name}」',
+        'skin_id': skin_id,
+    })
+
+
+@game_bp.route('/api/skin/buy', methods=['POST'])
+@login_required
+def buy_skin():
+    """购买皮肤 API"""
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
+    data = request.get_json(silent=True) or {}
+    skin_id = data.get('skin_id')
+
+    if not skin_id:
+        return jsonify({'success': False, 'message': '参数错误'}), 400
+
+    skin = Skin.query.get(skin_id)
+    if not skin:
+        return jsonify({'success': False, 'message': '皮肤不存在'}), 404
+
+    # 检查是否已拥有
+    owned_ids = {s.id for s in user.owned_skins}
+    if skin_id in owned_ids:
+        return jsonify({'success': False, 'message': '你已经拥有这款皮肤了'}), 400
+
+    # 检查金币是否足够
+    if user.coin_balance < skin.price:
+        return jsonify({
+            'success': False,
+            'message': f'金币不足！需要 {skin.price}，当前 {user.coin_balance}',
+        }), 400
+
+    # 扣除金币 + 添加皮肤
+    user.coin_balance -= skin.price
+    user.owned_skins.append(skin)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'成功购买「{skin.name}」！花费 {skin.price} 金币',
+        'coin_balance': user.coin_balance,
+    })
+
+
+@game_bp.route('/api/user/skin')
+@login_required
+def get_user_skin():
+    """获取当前用户装备的皮肤信息（游戏页面用）"""
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+
+    skin = Skin.query.get(user.skin_id)
+    if not skin:
+        skin = Skin.query.filter_by(is_default=1).first()
+
+    return jsonify({
+        'success': True,
+        'skin': skin.to_dict() if skin else None,
+    })

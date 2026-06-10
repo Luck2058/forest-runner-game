@@ -33,6 +33,12 @@ class User(UserMixin, db.Model):
     # 是否管理员：0=普通用户，1=管理员
     is_admin = db.Column(db.SmallInteger, default=0, comment='是否管理员')
 
+    # 当前装备的皮肤 ID（默认1=森林小狐狸）
+    skin_id = db.Column(db.Integer, default=1, comment='当前装备皮肤ID')
+
+    # 累计金币余额（用于购买皮肤）
+    coin_balance = db.Column(db.Integer, default=0, comment='金币余额')
+
     # 创建时间：自动记录注册时间
     create_time = db.Column(db.DateTime, default=datetime.utcnow, comment='注册时间')
 
@@ -86,6 +92,8 @@ class User(UserMixin, db.Model):
             'nickname': self.nickname,
             'avatar': self.avatar,
             'is_admin': bool(self.is_admin),
+            'skin_id': self.skin_id,
+            'coin_balance': self.coin_balance,
             'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S') if self.create_time else None
         }
 

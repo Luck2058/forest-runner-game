@@ -323,6 +323,11 @@ window.addEventListener('DOMContentLoaded', function() {
         console.log('[素材] 所有图片加载完成');
     });
 
+    // 【皮肤系统】加载用户装备的皮肤配色
+    if (typeof loadPlayerSkin === 'function') {
+        loadPlayerSkin();
+    }
+
     render();                        // 先画初始画面
     requestAnimationFrame(gameLoop); // 启动主循环
 });
