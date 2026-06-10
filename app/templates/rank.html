@@ -14,23 +14,23 @@
         <!-- 第二名 -->
         <div class="podium-item podium-2">
             <div class="podium-avatar">🐰</div>
-            <div class="podium-name">{{ scores[1].username }}</div>
-            <div class="podium-score">{{ scores[1].score }}</div>
+            <div class="podium-name">{{ scores[1].nickname }}</div>
+            <div class="podium-score">{{ scores[1].best_score }}</div>
             <div class="podium-block">🥈</div>
         </div>
         <!-- 第一名 -->
         <div class="podium-item podium-1">
             <div class="podium-crown">👑</div>
             <div class="podium-avatar">🦊</div>
-            <div class="podium-name">{{ scores[0].username }}</div>
-            <div class="podium-score">{{ scores[0].score }}</div>
+            <div class="podium-name">{{ scores[0].nickname }}</div>
+            <div class="podium-score">{{ scores[0].best_score }}</div>
             <div class="podium-block">🥇</div>
         </div>
         <!-- 第三名 -->
         <div class="podium-item podium-3">
             <div class="podium-avatar">🐻</div>
-            <div class="podium-name">{{ scores[2].username }}</div>
-            <div class="podium-score">{{ scores[2].score }}</div>
+            <div class="podium-name">{{ scores[2].nickname }}</div>
+            <div class="podium-score">{{ scores[2].best_score }}</div>
             <div class="podium-block">🥉</div>
         </div>
     </div>
@@ -59,10 +59,10 @@
                         {% endif %}
                     </td>
                     <td class="rank-name">
-                        <span class="player-icon">🌲</span>{{ item.username }}
+                        <span class="player-icon">🌲</span>{{ item.nickname }}
                     </td>
-                    <td class="rank-score">{{ item.score }}</td>
-                    <td>💰 {{ item.coins }}</td>
+                    <td class="rank-score">{{ item.best_score }}</td>
+                    <td>💰 {{ item.best_coins }}</td>
                     <td>{{ item.distance }}m</td>
                 </tr>
                 {% endfor %}
