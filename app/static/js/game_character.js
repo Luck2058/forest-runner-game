@@ -155,6 +155,8 @@ function drawGameHuman(p, prim, sec, acc, style) {
         ctx.fillStyle = '#1a1a2e';
         ctx.beginPath(); ctx.roundRect(p.x + p.w * 0.32, p.y - 12, p.w * 0.15, 5, 1); ctx.fill();
         ctx.beginPath(); ctx.roundRect(p.x + p.w * 0.53, p.y - 12, p.w * 0.15, 5, 1); ctx.fill();
+    }
+
     if (style !== 'police') {
         ctx.fillStyle = 'white';
         ctx.beginPath(); ctx.arc(p.x + p.w * 0.4, p.y - 8, 3.5, 0, Math.PI * 2); ctx.fill();
