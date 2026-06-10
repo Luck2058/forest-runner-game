@@ -76,11 +76,11 @@ class Skin(db.Model):
 
 
 def seed_skins():
-    """初始化预置皮肤数据（仅执行一次）"""
-    if Skin.query.count() > 0:
-        return
+    """初始化预置皮肤数据（增量添加，不重复）"""
+    existing_names = {s.name for s in Skin.query.all()}
 
     skins_data = [
+        # ---------- 原有皮肤 ----------
         {
             'name': '森林小狐狸',
             'description': '默认角色，经典的橙色小狐狸',
@@ -153,11 +153,125 @@ def seed_skins():
             'sort_order': 5,
             'is_default': 0,
         },
+        # ---------- 熊出没主题皮肤 ----------
+        {
+            'name': '棕熊勇士',
+            'description': '力大无穷的棕色勇士，守护森林的王者',
+            'skin_type': 'character',
+            'primary_color': '#8B4513',
+            'secondary_color': '#D2691E',
+            'accent_color': '#654321',
+            'sprite_path': '',
+            'price': 150,
+            'sort_order': 10,
+            'is_default': 0,
+        },
+        {
+            'name': '金毛憨熊',
+            'description': '憨厚可爱的金黄色小伙伴',
+            'skin_type': 'character',
+            'primary_color': '#FFD700',
+            'secondary_color': '#FFA500',
+            'accent_color': '#DAA520',
+            'sprite_path': '',
+            'price': 150,
+            'sort_order': 11,
+            'is_default': 0,
+        },
+        {
+            'name': '工匠小子',
+            'description': '戴着皮帽子的森林工匠，机智又勇敢',
+            'skin_type': 'character',
+            'primary_color': '#4169E1',
+            'secondary_color': '#8B4513',
+            'accent_color': '#FF4500',
+            'sprite_path': '',
+            'price': 200,
+            'sort_order': 12,
+            'is_default': 0,
+        },
+        {
+            'name': '菠萝猴王',
+            'description': '头顶菠萝冠的丛林之王，威风凛凛',
+            'skin_type': 'character',
+            'primary_color': '#228B22',
+            'secondary_color': '#FFD700',
+            'accent_color': '#8B4513',
+            'sprite_path': '',
+            'price': 180,
+            'sort_order': 13,
+            'is_default': 0,
+        },
+        {
+            'name': '机灵小鼠',
+            'description': '活泼机灵的小家伙，森林里的开心果',
+            'skin_type': 'character',
+            'primary_color': '#D2B48C',
+            'secondary_color': '#F5DEB3',
+            'accent_color': '#CD853F',
+            'sprite_path': '',
+            'price': 120,
+            'sort_order': 14,
+            'is_default': 0,
+        },
+        {
+            'name': '赤羽智者',
+            'description': '拥有火红羽毛的夜间智者，目光如炬',
+            'skin_type': 'character',
+            'primary_color': '#FF6347',
+            'secondary_color': '#FFA07A',
+            'accent_color': '#8B0000',
+            'sprite_path': '',
+            'price': 160,
+            'sort_order': 15,
+            'is_default': 0,
+        },
+        {
+            'name': '松果精灵',
+            'description': '最爱松果的灵动小精灵，身手敏捷',
+            'skin_type': 'character',
+            'primary_color': '#FF8C00',
+            'secondary_color': '#FFD700',
+            'accent_color': '#D2691E',
+            'sprite_path': '',
+            'price': 140,
+            'sort_order': 16,
+            'is_default': 0,
+        },
+        {
+            'name': '红衣萌娃',
+            'description': '穿着红色外套的可爱萌娃，人见人爱',
+            'skin_type': 'character',
+            'primary_color': '#FF69B4',
+            'secondary_color': '#FFB6C1',
+            'accent_color': '#FF1493',
+            'sprite_path': '',
+            'price': 220,
+            'sort_order': 17,
+            'is_default': 0,
+        },
+        {
+            'name': '正义警长',
+            'description': '维护森林正义的警长，威严帅气',
+            'skin_type': 'character',
+            'primary_color': '#191970',
+            'secondary_color': '#FFFFFF',
+            'accent_color': '#FFD700',
+            'sprite_path': '',
+            'price': 250,
+            'sort_order': 18,
+            'is_default': 0,
+        },
     ]
 
-    for data in skins_data:
+    new_skins = [data for data in skins_data if data['name'] not in existing_names]
+
+    for data in new_skins:
         skin = Skin(**data)
         db.session.add(skin)
 
-    db.session.commit()
-    print(f'[种子] 已初始化 {len(skins_data)} 款皮肤')
+    if new_skins:
+        db.session.commit()
+        print(f'[种子] 已新增 {len(new_skins)} 款皮肤')
+    else:
+        print('[种子] 所有皮肤已存在，跳过')
