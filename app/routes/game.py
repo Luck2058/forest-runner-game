@@ -100,6 +100,7 @@ def skin_shop():
     return render_template(
         'skin_shop.html',
         skins=all_skins,
+        skins_json=[s.to_dict() for s in all_skins],
         owned_ids=owned_ids,
         current_skin_id=user.skin_id,
         coin_balance=user.coin_balance,

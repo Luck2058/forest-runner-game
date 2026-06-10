@@ -56,7 +56,7 @@
 <script>
 // 页面加载后渲染所有皮肤预览
 window.addEventListener('DOMContentLoaded', function() {
-    const skinData = {{ skins | map(attribute='to_dict') | list | tojson }};
+    const skinData = {{ skins_json | tojson }};
 
     skinData.forEach(skin => {
         const canvas = document.getElementById(`skinCanvas-${skin.id}`);
