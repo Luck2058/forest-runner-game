@@ -4,10 +4,13 @@
  */
 
 function drawPlayerStanding(p) {
-    const sprite = SpriteLoader.get('player');
-    if (sprite) {
-        ctx.drawImage(sprite, p.x, p.y, p.w, p.h);
-        return;
+    // 只有当前皮肤配置了 sprite_path 时才用 SVG 素材，否则走 Canvas 独立绘制
+    if (playerSkin.sprite_path) {
+        const sprite = SpriteLoader.get('player');
+        if (sprite) {
+            ctx.drawImage(sprite, p.x, p.y, p.w, p.h);
+            return;
+        }
     }
 
     const skinName = playerSkin.name || '森林小狐狸';

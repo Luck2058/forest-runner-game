@@ -190,16 +190,18 @@ function drawPlayerSliding(p) {
     const slideW = p.w + 15;   // 趴下后变宽
     const slideH = Math.floor(CONFIG.PLAYER_H * CONFIG.SLIDE_H_RATIO);
 
-    // 尝试用 SVG 素材
-    const sprite = SpriteLoader.get('player');
-    if (sprite) {
-        ctx.save();
-        // 水平翻转 + 压扁效果模拟趴下
-        ctx.translate(p.x + slideW / 2, CONFIG.GROUND_Y - slideH + slideH / 2);
-        ctx.scale(1.4, 0.5);   // 变宽变扁
-        ctx.drawImage(sprite, -p.w / 2, -p.h / 2, p.w, p.h);
-        ctx.restore();
-        return;
+    // 只有当前皮肤配置了 sprite_path 时才用 SVG 素材
+    if (playerSkin.sprite_path) {
+        const sprite = SpriteLoader.get('player');
+        if (sprite) {
+            ctx.save();
+            // 水平翻转 + 压扁效果模拟趴下
+            ctx.translate(p.x + slideW / 2, CONFIG.GROUND_Y - slideH + slideH / 2);
+            ctx.scale(1.4, 0.5);   // 变宽变扁
+            ctx.drawImage(sprite, -p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+            return;
+        }
     }
 
     // 降级：Canvas 绘制（使用皮肤配色）
@@ -224,11 +226,13 @@ function drawPlayerSliding(p) {
 
 /** 绘制站立/跳跃姿态 */
 function drawPlayerStanding(p) {
-    // 尝试用 SVG 素材
-    const sprite = SpriteLoader.get('player');
-    if (sprite) {
-        ctx.drawImage(sprite, p.x, p.y, p.w, p.h);
-        return;
+    // 只有当前皮肤配置了 sprite_path 时才用 SVG 素材
+    if (playerSkin.sprite_path) {
+        const sprite = SpriteLoader.get('player');
+        if (sprite) {
+            ctx.drawImage(sprite, p.x, p.y, p.w, p.h);
+            return;
+        }
     }
 
     // 降级：Canvas 绘制（使用皮肤配色）
