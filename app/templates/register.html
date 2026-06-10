@@ -84,8 +84,8 @@
 
 {% block extra_js %}
 <script>
-// 前端校验两次密码是否一致
-document.querySelector('form').addEventListener('submit', function(e) {
+// 前端校验两次密码是否一致（绑定在按钮 click 上，先于 form submit 触发）
+document.querySelector('button[type="submit"]').addEventListener('click', function(e) {
     const p1 = document.getElementById('password').value;
     const p2 = document.getElementById('confirm').value;
     if (p1 !== p2) {

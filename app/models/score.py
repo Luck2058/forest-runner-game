@@ -125,16 +125,23 @@ class Score(db.Model):
     def get_statistics(cls):
         """
         获取全局统计信息
-        返回字典：total_games / total_users / top_score
+        返回字典：total_games / total_users / top_score / today_games
         """
         total_games = db.session.query(func.count(cls.id)).scalar() or 0
         total_users = db.session.query(func.count(func.distinct(cls.user_id))).scalar() or 0
         top_score   = db.session.query(func.max(cls.score)).scalar() or 0
 
+        # 今日游戏次数
+        today = date.today()
+        today_games = db.session.query(func.count(cls.id)).filter(
+            func.date(cls.create_time) == today
+        ).scalar() or 0
+
         return {
             'total_games':  total_games,
             'total_users':  total_users,
             'top_score':    top_score,
+            'today_games':  today_games,
         }
 
     # ------------------------------------------------------------------ #
