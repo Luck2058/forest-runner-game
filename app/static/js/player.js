@@ -8,6 +8,8 @@
  *   - 玩家绘制（站立/跳跃/下滑三种姿态）
  *
  * 依赖：CONFIG（全局常量）、gameState（游戏状态）
+ *
+ * 【B岗修改】优先使用 SVG 素材绘制，素材加载失败时降级为 Canvas 绘制
  */
 
 // ============================================================
@@ -58,6 +60,9 @@ function jump() {
         player.jumpCount++;
         // 跳跃时自动取消下滑
         if (player.isSliding) endSlide();
+
+        // 【B岗】播放跳跃音效
+        if (typeof playSFX === 'function') playSFX('jump');
     }
 }
 
@@ -125,7 +130,7 @@ function updatePlayerPhysics() {
 }
 
 // ============================================================
-// 绘制玩家（站立/跳跃/下滑 三种姿态）
+// 【B岗修改】绘制玩家 —— 优先用 SVG 素材，降级为 Canvas
 // ============================================================
 function drawPlayer() {
     const p = player;
@@ -142,6 +147,19 @@ function drawPlayerSliding(p) {
     const slideW = p.w + 15;   // 趴下后变宽
     const slideH = Math.floor(CONFIG.PLAYER_H * CONFIG.SLIDE_H_RATIO);
 
+    // 尝试用 SVG 素材
+    const sprite = SpriteLoader.get('player');
+    if (sprite) {
+        ctx.save();
+        // 水平翻转 + 压扁效果模拟趴下
+        ctx.translate(p.x + slideW / 2, CONFIG.GROUND_Y - slideH + slideH / 2);
+        ctx.scale(1.4, 0.5);   // 变宽变扁
+        ctx.drawImage(sprite, -p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+        return;
+    }
+
+    // 降级：Canvas 绘制
     // 身体：扁平的深绿色椭圆
     ctx.fillStyle = '#2d6a4f';
     ctx.beginPath();
@@ -161,6 +179,14 @@ function drawPlayerSliding(p) {
 
 /** 绘制站立/跳跃姿态 */
 function drawPlayerStanding(p) {
+    // 尝试用 SVG 素材
+    const sprite = SpriteLoader.get('player');
+    if (sprite) {
+        ctx.drawImage(sprite, p.x, p.y, p.w, p.h);
+        return;
+    }
+
+    // 降级：Canvas 绘制
     // 身体：深绿色圆角矩形
     ctx.fillStyle = '#2d6a4f';
     ctx.beginPath();

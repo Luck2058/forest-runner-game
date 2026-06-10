@@ -641,17 +641,196 @@ img { max-width: 100%; }
 .admin-actions { display: flex; gap: 1rem; justify-content: center; }
 
 /* ============================================================
+   难度选择面板（B岗新增）
+   ============================================================ */
+.difficulty-panel {
+    margin: 1rem 0 1.5rem;
+    text-align: center;
+}
+.diff-title {
+    font-size: 1rem;
+    color: var(--green-light);
+    margin-bottom: 0.8rem;
+    letter-spacing: 2px;
+}
+.diff-buttons {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.diff-btn {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
+    padding: 0.7rem 1rem;
+    color: var(--white);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    min-width: 90px;
+}
+.diff-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+}
+.diff-btn-active {
+    background: rgba(116,198,157,0.3) !important;
+    border-color: var(--green-light) !important;
+    box-shadow: 0 0 12px rgba(116,198,157,0.3);
+}
+.diff-icon { font-size: 1.5rem; }
+.diff-label { font-size: 0.95rem; font-weight: bold; }
+.diff-desc { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+
+/* 游戏结束难度显示 */
+.result-difficulty {
+    font-size: 0.9rem;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+    background: rgba(255,255,255,0.1);
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* ============================================================
+   音效开关按钮样式（B岗新增）
+   ============================================================ */
+#soundToggleBtn {
+    min-width: 80px;
+}
+
+/* ============================================================
+   游戏覆盖层增强（B岗美化）
+   ============================================================ */
+.game-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(27, 67, 50, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+}
+.game-overlay.hidden { display: none; }
+.overlay-content { text-align: center; color: var(--white); animation: overlayFadeIn 0.3s ease; }
+@keyframes overlayFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.overlay-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    animation: bounceIn 0.5s ease;
+}
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================================
    通用辅助
    ============================================================ */
 .hidden { display: none !important; }
 
-/* 响应式适配 */
+/* 按钮点击波纹效果 */
+.btn { position: relative; overflow: hidden; }
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+.btn:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+/* 首页按钮增强动效 */
+.hero-buttons .btn {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+.hero-buttons .btn:nth-child(2) { animation-delay: 0.3s; }
+.hero-buttons .btn:nth-child(3) { animation-delay: 0.6s; }
+.hero-buttons .btn:nth-child(4) { animation-delay: 0.9s; }
+@keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    50% { box-shadow: 0 4px 20px rgba(45, 106, 79, 0.35); }
+}
+
+/* 卡片悬停增强 */
+.feature-card {
+    transition: all 0.3s ease;
+}
+.feature-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(45, 106, 79, 0.2);
+}
+
+/* 排行榜领奖台动画 */
+.podium-item {
+    animation: podiumRise 0.6s ease-out both;
+}
+.podium-2 { animation-delay: 0.1s; }
+.podium-1 { animation-delay: 0.3s; }
+.podium-3 { animation-delay: 0.5s; }
+@keyframes podiumRise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 个人中心卡片入场动画 */
+.stat-card {
+    transition: all 0.3s ease;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(45, 106, 79, 0.2);
+}
+
+/* 认证页面增强动画 */
+.auth-card {
+    animation: cardSlideIn 0.4s ease-out;
+}
+@keyframes cardSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 响应式适配（B岗增强） */
 @media (max-width: 600px) {
     .navbar { padding: 0.6rem 1rem; }
     .brand-name { font-size: 1.2rem; }
     .nav-link { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
-    .hero-section { min-height: 360px; }
+    .hero-section { min-height: 360px; padding: 2rem 1rem; }
     .game-title { font-size: 2.5rem; }
     .top3-podium { gap: 0.5rem; }
-    .game-hud { gap: 0.5rem; }
+    .game-hud { gap: 0.5rem; padding: 0.6rem 0.8rem; }
+    .hud-value { font-size: 1.1rem; }
+    .diff-buttons { gap: 0.5rem; }
+    .diff-btn { min-width: 75px; padding: 0.5rem 0.7rem; }
+    .diff-icon { font-size: 1.2rem; }
+    .diff-desc { display: none; }
+    .game-controls { gap: 0.5rem; }
+    .game-page { padding: 0.5rem 1rem 1rem; }
+    .auth-card { padding: 1.5rem; }
+}
+
+/* 中等屏幕适配 */
+@media (min-width: 601px) and (max-width: 900px) {
+    .hero-section { min-height: 400px; }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
 }

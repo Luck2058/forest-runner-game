@@ -10,14 +10,15 @@
  *   - 页面加载启动
  *
  * 模块依赖关系：
- *   config.js  ← 全局 CONFIG 常量 & 工具函数（必须最先加载）
- *   player.js  ← 玩家角色（跳跃、下滑、绘制）
- *   obstacle.js ← 障碍物+金币+背景（生成、移动、碰撞、绘制）
- *   score.js   ← 分数统计（计分、HUD更新、结算面板）
- *   api.js     ← 后端通信（成绩提交）
+ *   config.js   ← 全局 CONFIG 常量 & 工具函数 & SpriteLoader（必须最先加载）
+ *   player.js   ← 玩家角色（跳跃、下滑、绘制）
+ *   obstacle.js ← 障碍物+金币+背景+粒子（生成、移动、碰撞、绘制）
+ *   score.js    ← 分数统计（计分、HUD更新、结算面板）
+ *   api.js      ← 后端通信（成绩提交）
+ *   audio.js    ← 【B岗新增】音效系统（跳跃/金币/碰撞音效、背景音乐、开关）
  *
  * 加载顺序（在 game.html 中）：
- *   config.js → player.js → obstacle.js → score.js → api.js → game.js（本文件最后加载）
+ *   config.js → player.js → obstacle.js → score.js → api.js → audio.js → game.js
  */
 
 // ============================================================
@@ -32,6 +33,7 @@ let currentDifficulty = 'normal';
 
 // ============================================================
 // 难度配置预设（影响游戏参数）
+// ============================================================
 const DIFFICULTY_PRESETS = {
     easy: {
         OBS_SPEED:         2.5,
@@ -56,7 +58,7 @@ const DIFFICULTY_PRESETS = {
     hard: {
         OBS_SPEED:         5,
         SPEED_UP_AMOUNT:   0.20,
-        OBS_INTERVAL_MIN:  70,
+        OBS_INTERVAL_MIN: 70,
         OBS_INTERVAL_MAX: 140,
         AIR_OBS_CHANCE:    0.35,
         COIN_INTERVAL_MIN:  70,
@@ -130,7 +132,6 @@ function update() {
 // 游戏渲染：每帧绘制画面
 // ============================================================
 function render() {
-    // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // ---- 天空背景渐变 ----
@@ -140,6 +141,12 @@ function render() {
     skyGrad.addColorStop(1,   '#e8f5e9');
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 【B岗新增】云朵
+    if (typeof drawClouds === 'function') drawClouds();
+
+    // 【B岗新增】山丘
+    if (typeof drawHills === 'function') drawHills();
 
     // ---- 远景树木 ----
     drawBgTrees();            // ← obstacle.js
@@ -155,6 +162,9 @@ function render() {
 
     // ---- 玩家角色 ----
     drawPlayer();             // ← player.js
+
+    // 【B岗新增】粒子特效
+    if (typeof updateAndDrawParticles === 'function') updateAndDrawParticles();
 
     // ---- 暂停遮罩层文字 ----
     if (gameState === 'paused') {
@@ -175,14 +185,15 @@ function render() {
 function triggerGameOver() {
     gameState = 'over';
 
+    // 【B岗】停止背景音乐
+    if (typeof stopBGM === 'function') stopBGM();
+
     // 填充结算面板数据
     showFinalScore();         // ← score.js
 
-    // 显示游戏结束遮罩
     const overlay = document.getElementById('gameOverOverlay');
     if (overlay) overlay.classList.remove('hidden');
 
-    // 禁用暂停按钮
     const pauseBtn = document.getElementById('pauseBtn');
     if (pauseBtn) pauseBtn.disabled = true;
 
@@ -204,37 +215,38 @@ function gameLoop() {
 }
 
 // ============================================================
-// 对外暴露的控制函数（供 HTML 按钮调用）
+// 对外暴露的控制函数
 // ============================================================
 
-/** 开始游戏 */
 function startGame() {
     initGame();
     gameState = 'running';
 
-    // 隐藏开始遮罩
+    // 【B岗】初始化音效并播放背景音乐
+    if (typeof initAudio === 'function') initAudio();
+    if (typeof startBGM === 'function') startBGM();
+
     const startOverlay = document.getElementById('startOverlay');
     if (startOverlay) startOverlay.classList.add('hidden');
 
-    // 启用暂停按钮
     const pauseBtn = document.getElementById('pauseBtn');
     if (pauseBtn) pauseBtn.disabled = false;
 }
 
-/** 暂停 / 继续切换 */
 function togglePause() {
     if (gameState === 'running') {
         gameState = 'paused';
+        if (typeof stopBGM === 'function') stopBGM();
         const btn = document.getElementById('pauseBtn');
         if (btn) btn.textContent = '▶ 继续';
     } else if (gameState === 'paused') {
         gameState = 'running';
+        if (typeof startBGM === 'function') startBGM();
         const btn = document.getElementById('pauseBtn');
         if (btn) btn.textContent = '⏸ 暂停';
     }
 }
 
-/** 重新开始 */
 function restartGame() {
     const overlay = document.getElementById('gameOverOverlay');
     if (overlay) overlay.classList.add('hidden');
@@ -303,9 +315,14 @@ document.addEventListener('keyup', function(e) {
 });
 
 // ============================================================
-// 页面加载完毕后启动游戏循环
+// 页面加载完毕后启动游戏
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
+    // 【B岗】预加载素材图片
+    SpriteLoader.loadAll().then(() => {
+        console.log('[素材] 所有图片加载完成');
+    });
+
     render();                        // 先画初始画面
     requestAnimationFrame(gameLoop); // 启动主循环
 });

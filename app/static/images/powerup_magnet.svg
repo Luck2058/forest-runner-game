@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- 磁铁道具 - 吸引金币 -->
+  <rect x="2" y="4" width="28" height="24" rx="6" fill="#e76f51" opacity="0.2"/>
+  <!-- 磁铁U形 -->
+  <path d="M8,8 L8,20 Q8,28 16,28 Q24,28 24,20 L24,8" stroke="#e76f51" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- 左磁极 -->
+  <rect x="6" y="6" width="6" height="8" rx="2" fill="#e76f51"/>
+  <!-- 右磁极 -->
+  <rect x="20" y="6" width="6" height="8" rx="2" fill="#40916c"/>
+  <!-- 磁力线 -->
+  <path d="M12,16 Q16,12 20,16" stroke="#e9c46a" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M12,20 Q16,16 20,20" stroke="#e9c46a" stroke-width="1.5" fill="none" opacity="0.4"/>
+</svg>
