@@ -1,24 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="80" viewBox="0 0 40 80">
-  <!-- 树桩障碍物 -->
-  <!-- 树桩主体 -->
-  <rect x="4" y="20" width="32" height="55" rx="5" fill="#8B5E3C"/>
-  <rect x="6" y="22" width="28" height="51" rx="4" fill="#A0714F"/>
-  <!-- 树桩年轮 -->
-  <ellipse cx="20" cy="20" rx="18" ry="8" fill="#A0714F"/>
-  <ellipse cx="20" cy="20" rx="14" ry="6" fill="#8B5E3C"/>
-  <ellipse cx="20" cy="20" rx="9" ry="4" fill="#A0714F"/>
-  <ellipse cx="20" cy="20" rx="4" ry="2" fill="#6B4423"/>
-  <!-- 纹路线条 -->
-  <line x1="8" y1="35" x2="32" y2="35" stroke="#6B4423" stroke-width="1" opacity="0.5"/>
-  <line x1="8" y1="48" x2="32" y2="48" stroke="#6B4423" stroke-width="1" opacity="0.5"/>
-  <line x1="8" y1="60" x2="32" y2="60" stroke="#6B4423" stroke-width="1" opacity="0.5"/>
-  <!-- 顶部绿叶 -->
-  <ellipse cx="12" cy="16" rx="10" ry="8" fill="#52b788"/>
-  <ellipse cx="28" cy="16" rx="10" ry="8" fill="#52b788"/>
-  <ellipse cx="20" cy="12" rx="12" ry="10" fill="#74c69d"/>
-  <!-- 小蘑菇 -->
-  <rect x="15" y="56" width="4" height="6" fill="#f0f0f0"/>
-  <ellipse cx="17" cy="56" rx="5" ry="3" fill="#e76f51"/>
-  <circle cx="15" cy="55" r="1" fill="white" opacity="0.6"/>
-  <circle cx="19" cy="54" r="0.8" fill="white" opacity="0.6"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="36" viewBox="0 0 80 36">
+  <!-- 森林酷跑 - 横向倒下的原木障碍物 -->
+  <!-- 主体（横向圆柱） -->
+  <rect x="4" y="6" width="72" height="24" rx="12" fill="#8B5E3C"/>
+  <!-- 树皮纹理（深色条纹） -->
+  <rect x="4" y="6" width="72" height="24" rx="12" fill="#7A5033" opacity="0.4"/>
+  <line x1="20" y1="8" x2="20" y2="28" stroke="#6B4423" stroke-width="1.2" opacity="0.4"/>
+  <line x1="36" y1="7" x2="36" y2="29" stroke="#6B4423" stroke-width="1" opacity="0.3"/>
+  <line x1="52" y1="8" x2="52" y2="28" stroke="#6B4423" stroke-width="1.2" opacity="0.4"/>
+  <!-- 裂纹 -->
+  <path d="M28,10 L30,16 L28,18 L30,24" stroke="#5C3D22" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M58,12 L60,18 L58,20" stroke="#5C3D22" stroke-width="0.8" fill="none" opacity="0.4"/>
+  <!-- 左端面年轮 -->
+  <ellipse cx="10" cy="18" rx="8" ry="12" fill="#A0714F"/>
+  <ellipse cx="10" cy="18" rx="6" ry="9" fill="#8B5E3C"/>
+  <ellipse cx="10" cy="18" rx="4" ry="6" fill="#A0714F"/>
+  <ellipse cx="10" cy="18" rx="2" ry="3" fill="#8B5E3C"/>
+  <ellipse cx="10" cy="18" rx="0.8" ry="1.2" fill="#6B4423"/>
+  <!-- 右端面年轮 -->
+  <ellipse cx="70" cy="18" rx="8" ry="12" fill="#A0714F"/>
+  <ellipse cx="70" cy="18" rx="6" ry="9" fill="#8B5E3C"/>
+  <ellipse cx="70" cy="18" rx="4" ry="6" fill="#A0714F"/>
+  <ellipse cx="70" cy="18" rx="2" ry="3" fill="#8B5E3C"/>
+  <ellipse cx="70" cy="18" rx="0.8" ry="1.2" fill="#6B4423"/>
+  <!-- 青苔 -->
+  <ellipse cx="30" cy="8" rx="6" ry="4" fill="#52b788" opacity="0.8"/>
+  <ellipse cx="30" cy="8" rx="4" ry="2.5" fill="#74c69d" opacity="0.7"/>
+  <ellipse cx="54" cy="7" rx="5" ry="3" fill="#52b788" opacity="0.7"/>
+  <ellipse cx="54" cy="7" rx="3" ry="1.8" fill="#74c69d" opacity="0.6"/>
+  <!-- 小草 -->
+  <path d="M14,6 L13,0" stroke="#40916c" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M16,6 L18,1" stroke="#52b788" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M42,6 L41,1" stroke="#40916c" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M60,6 L62,2" stroke="#52b788" stroke-width="1" stroke-linecap="round"/>
+  <!-- 小蘑菇装饰 -->
+  <rect x="46" y="26" width="3" height="4" fill="#f0e6d3" rx="1"/>
+  <ellipse cx="47.5" cy="26" rx="4" ry="2.5" fill="#e76f51"/>
+  <circle cx="46" cy="25.2" r="0.8" fill="white" opacity="0.6"/>
+  <circle cx="49" cy="24.8" r="0.6" fill="white" opacity="0.5"/>
 </svg>
