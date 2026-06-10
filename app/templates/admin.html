@@ -39,18 +39,62 @@
         <!-- 用户管理 -->
         <div class="admin-panel">
             <div class="panel-header">
-                <h3>👥 用户管理</h3>
-                <button class="btn btn-sm btn-outline">刷新</button>
+                <h3>👥 用户管理（共 {{ users|length }} 人）</h3>
             </div>
             <div class="panel-body">
                 <table class="admin-table">
                     <thead>
-                        <tr><th>ID</th><th>用户名</th><th>昵称</th><th>注册时间</th><th>操作</th></tr>
+                        <tr><th>ID</th><th>用户名</th><th>昵称</th><th>注册时间</th><th>身份</th></tr>
                     </thead>
                     <tbody>
-                        <!-- TODO：成员三 —— 对接数据库查询用户列表 -->
-                        <tr><td>1</td><td>admin</td><td>管理员</td><td>2024-06-01</td><td><button class="btn-xs">详情</button></td></tr>
-                        <tr><td>2</td><td>player1</td><td>森林小熊</td><td>2024-06-01</td><td><button class="btn-xs">详情</button></td></tr>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.nickname or '-' }}</td>
+                            <td>{{ u.create_time.strftime('%Y-%m-%d %H:%M') if u.create_time else '-' }}</td>
+                            <td>{{ '管理员' if u.is_admin else '普通用户' }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if not users %}
+                        <tr>
+                            <td colspan="5" class="empty-tip">🌿 暂无注册用户</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 最近成绩 -->
+        <div class="admin-panel">
+            <div class="panel-header">
+                <h3>📊 最近成绩记录</h3>
+            </div>
+            <div class="panel-body">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>ID</th><th>用户</th><th>得分</th><th>金币</th><th>距离</th><th>难度</th><th>时间</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in recent_scores %}
+                        <tr>
+                            <td>{{ s.id }}</td>
+                            <td>{{ s.user.nickname or s.user.username if s.user else '-' }}</td>
+                            <td>{{ s.score }}</td>
+                            <td>{{ s.coins }}</td>
+                            <td>{{ s.distance }}m</td>
+                            <td>{{ s.difficulty }}</td>
+                            <td>{{ s.create_time.strftime('%Y-%m-%d %H:%M') if s.create_time else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if not recent_scores %}
+                        <tr>
+                            <td colspan="7" class="empty-tip">🌿 暂无成绩记录</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -59,20 +103,35 @@
         <!-- 公告管理 -->
         <div class="admin-panel">
             <div class="panel-header">
-                <h3>📢 公告管理</h3>
-                <button class="btn btn-sm btn-primary" onclick="showNoticeForm()">+ 新增公告</button>
+                <h3>📢 公告管理（共 {{ notices|length }} 条）</h3>
+                <button class="btn btn-sm btn-primary" onclick="toggleNoticeForm()">+ 新增公告</button>
             </div>
             <div class="panel-body">
-                <!-- TODO：成员三 —— 对接数据库查询公告列表 -->
+                <!-- 公告列表 -->
+                {% for n in notices %}
                 <div class="notice-item">
-                    <span class="notice-title">🌲 游戏正式上线！</span>
-                    <span class="notice-time">2024-06-01</span>
-                    <button class="btn-xs btn-danger">删除</button>
+                    <div class="notice-info">
+                        <span class="notice-title">{{ n.title }}</span>
+                        <span class="notice-meta">{{ n.create_time.strftime('%Y-%m-%d %H:%M') if n.create_time else '-' }} · {{ n.author.nickname or n.author.username if n.author else '-' }}</span>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin.delete_notice', notice_id=n.id) }}" style="display:inline;" onsubmit="return confirm('确认删除该公告？');">
+                        <button type="submit" class="btn-xs btn-danger">删除</button>
+                    </form>
                 </div>
+                {% endfor %}
+
+                {% if not notices %}
+                <div class="empty-tip">🌿 暂无公告，点击上方按钮发布第一条</div>
+                {% endif %}
+
+                <!-- 新增公告表单 -->
                 <div class="notice-form hidden" id="noticeForm">
-                    <input type="text" placeholder="公告标题" class="form-input">
-                    <textarea placeholder="公告内容" class="form-textarea"></textarea>
-                    <button class="btn btn-sm btn-primary">发布</button>
+                    <form method="POST" action="{{ url_for('admin.add_notice') }}">
+                        <input type="text" name="title" placeholder="公告标题" class="form-input" required maxlength="200">
+                        <textarea name="content" placeholder="公告内容（可选）" class="form-textarea" rows="3"></textarea>
+                        <button type="submit" class="btn btn-sm btn-primary">发布</button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="toggleNoticeForm()">取消</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -89,7 +148,7 @@
 
 {% block extra_js %}
 <script>
-function showNoticeForm() {
+function toggleNoticeForm() {
     const form = document.getElementById('noticeForm');
     form.classList.toggle('hidden');
 }

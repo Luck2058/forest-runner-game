@@ -64,7 +64,7 @@
                 <button id="startBtn" class="btn btn-start btn-lg" onclick="startGame()">
                     🎮 开始游戏
                 </button>
-                <p class="key-hint">空格 / ↑键 跳跃 &nbsp;|&nbsp; P 暂停 &nbsp;|&nbsp; ↓ 下滑</p>
+                <p class="key-hint">空格 / ↑ 跳跃 &nbsp;|&nbsp; ↓ 下滑躲避 &nbsp;|&nbsp; P 暂停</p>
             </div>
         </div>
 
@@ -98,6 +98,14 @@
 
     <!-- ===== 控制按钮（B岗增强：添加音效开关） ===== -->
     <div class="game-controls">
+        <!-- 难度选择 -->
+        <div class="difficulty-bar">
+            <span class="diff-label">难度：</span>
+            <button class="diff-btn" data-level="easy" onclick="setDifficulty('easy')">🌱 简单</button>
+            <button class="diff-btn active" data-level="normal" onclick="setDifficulty('normal')">🌲 普通</button>
+            <button class="diff-btn" data-level="hard" onclick="setDifficulty('hard')">🌳 困难</button>
+        </div>
+
         <button id="pauseBtn" class="btn btn-outline" onclick="togglePause()" disabled>⏸ 暂停</button>
         <button id="soundToggleBtn" class="btn btn-outline" onclick="toggleSoundBtn()">🔊 音效</button>
         <button class="btn btn-outline" onclick="restartGame()">🔄 重新开始</button>
@@ -106,7 +114,8 @@
 
     <!-- ===== 键盘说明（B岗增强：下滑操作提示） ===== -->
     <div class="key-guide">
-        <span class="key">空格 / ↑</span> 跳跃 &nbsp;
+        <span class="key">空格 / ↑</span> 跳跃（可二段跳）&nbsp;
+        <span class="key">↓</span> 下滑躲避 &nbsp;
         <span class="key">P</span> 暂停/继续 &nbsp;
         <span class="key">R</span> 重新开始 &nbsp;
         <span class="key">↓</span> 下滑
@@ -115,10 +124,11 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- 加载游戏脚本 -->
-<script src="{{ url_for('static', filename='js/game.js') }}"></script>
-<script>
-// 游戏结束时更新难度显示
-const originalTriggerGameOver = window.triggerGameOver;
-</script>
+<!-- 按依赖顺序加载游戏模块脚本 -->
+<script src="{{ url_for('static', filename='js/config.js') }}"></script>   <!-- 0 全局配置&工具函数（必须最先） -->
+<script src="{{ url_for('static', filename='js/player.js') }}"></script>    <!-- 1 玩家角色模块 -->
+<script src="{{ url_for('static', filename='js/obstacle.js') }}"></script>   <!-- 2 障碍物&金币模块 -->
+<script src="{{ url_for('static', filename='js/score.js') }}"></script>      <!-- 3 分数统计模块 -->
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>        <!-- 4 后端接口模块 -->
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>        <!-- 5 主控&主循环（最后加载）-->
 {% endblock %}
