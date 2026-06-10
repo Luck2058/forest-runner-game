@@ -20,7 +20,6 @@ function drawSkinPreview(ctx, skin, w, h) {
         case '机灵小鼠':      drawLittleMonkey(ctx, w, h, primary, secondary, accent); break;
         case '赤羽智者':      drawOwl(ctx, w, h, primary, secondary, accent); break;
         case '松果精灵':      drawSquirrel(ctx, w, h, primary, secondary, accent); break;
-        case '红衣萌娃':      drawRedGirl(ctx, w, h, primary, secondary, accent); break;
         case '正义警长':      drawPolice(ctx, w, h, primary, secondary, accent); break;
         default:              drawDefaultFox(ctx, w, h, primary, secondary, accent); break;
     }
@@ -293,43 +292,6 @@ function drawSquirrel(ctx, w, h, primary, secondary, accent) {
     ctx.fillStyle = primary;
     ctx.beginPath(); ctx.roundRect(w*0.28, h*0.7, w*0.16, h*0.18, 4); ctx.fill();
     ctx.beginPath(); ctx.roundRect(w*0.56, h*0.7, w*0.16, h*0.18, 4); ctx.fill();
-}
-
-// ==================== 红衣萌娃（嘟嘟）====================
-function drawRedGirl(ctx, w, h, primary, secondary, accent) {
-    ctx.fillStyle = primary;
-    ctx.beginPath(); ctx.roundRect(w*0.22, h*0.42, w*0.56, h*0.38, 8); ctx.fill();
-
-    ctx.fillStyle = accent;
-    ctx.beginPath();
-    ctx.moveTo(w*0.2, h*0.78); ctx.lineTo(w*0.5, h*0.92); ctx.lineTo(w*0.8, h*0.78); ctx.fill();
-
-    ctx.fillStyle = '#F5DEB3';
-    ctx.beginPath(); ctx.arc(w*0.5, h*0.2, w*0.22, 0, Math.PI*2); ctx.fill();
-
-    // 双马尾
-    ctx.fillStyle = '#1a1a2e';
-    ctx.beginPath(); ctx.ellipse(w*0.15, h*0.15, w*0.08, h*0.18, 0.3, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(w*0.85, h*0.15, w*0.08, h*0.18, -0.3, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w*0.5, h*0.1, w*0.2, 0, Math.PI); ctx.fill();
-
-    ctx.fillStyle = 'white';
-    ctx.beginPath(); ctx.arc(w*0.42, h*0.18, 4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w*0.58, h*0.18, 4, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#1a1a2e';
-    ctx.beginPath(); ctx.arc(w*0.42, h*0.18, 2, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w*0.58, h*0.18, 2, 0, Math.PI*2); ctx.fill();
-
-    ctx.fillStyle = 'rgba(255,150,150,0.5)';
-    ctx.beginPath(); ctx.arc(w*0.35, h*0.24, 4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w*0.65, h*0.24, 4, 0, Math.PI*2); ctx.fill();
-
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(w*0.5, h*0.26, 4, 0.2, Math.PI-0.2); ctx.stroke();
-
-    ctx.fillStyle = primary;
-    ctx.beginPath(); ctx.roundRect(w*0.1, h*0.48, w*0.12, h*0.22, 4); ctx.fill();
-    ctx.beginPath(); ctx.roundRect(w*0.78, h*0.48, w*0.12, h*0.22, 4); ctx.fill();
 }
 
 // ==================== 正义警长 ====================

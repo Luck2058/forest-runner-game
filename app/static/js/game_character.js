@@ -23,7 +23,6 @@ function drawPlayerStanding(p) {
         case '机灵小鼠': drawGameMonkey(p, prim, sec, acc, false); break;
         case '赤羽智者': drawGameOwl(p, prim, sec, acc); break;
         case '松果精灵': drawGameSquirrel(p, prim, sec, acc); break;
-        case '红衣萌娃': drawGameHuman(p, prim, sec, acc, 'girl'); break;
         case '正义警长': drawGameHuman(p, prim, sec, acc, 'police'); break;
         default: drawGameFox(p, prim, sec, acc); break;
     }
@@ -128,19 +127,13 @@ function drawGameMonkey(p, prim, sec, acc, hasCrown) {
     ctx.beginPath(); ctx.arc(p.x + p.w * 0.5, p.y + 5, 2.5, 0, Math.PI * 2); ctx.fill();
 }
 
-// ==================== 人形（光头强/警察/嘟嘟）====================
+// ==================== 人形（光头强/警察）====================
 function drawGameHuman(p, prim, sec, acc, style) {
     const legOffset = Math.sin(player.slideTimer * 0.3 || 0) * 4;
     ctx.fillStyle = prim;
     ctx.beginPath(); ctx.roundRect(p.x + 5, p.y + 5, p.w - 10, p.h - 10, 5); ctx.fill();
-    if (style === 'girl') {
-        ctx.fillStyle = acc;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y + p.h - 5); ctx.lineTo(p.x + p.w * 0.5, p.y + p.h + 10); ctx.lineTo(p.x + p.w, p.y + p.h - 5); ctx.fill();
-    } else {
-        ctx.fillStyle = '#654321';
-        ctx.beginPath(); ctx.roundRect(p.x + 5, p.y + p.h - 15, p.w - 10, 15, 3); ctx.fill();
-    }
+    ctx.fillStyle = '#654321';
+    ctx.beginPath(); ctx.roundRect(p.x + 5, p.y + p.h - 15, p.w - 10, 15, 3); ctx.fill();
     ctx.fillStyle = style === 'police' ? prim : '#654321';
     ctx.beginPath(); ctx.roundRect(p.x + 8, p.y + p.h - 5 + legOffset, p.w * 0.3, 12, 3); ctx.fill();
     ctx.beginPath(); ctx.roundRect(p.x + p.w * 0.58, p.y + p.h - 5 - legOffset, p.w * 0.3, 12, 3); ctx.fill();
@@ -159,12 +152,6 @@ function drawGameHuman(p, prim, sec, acc, style) {
         ctx.fillStyle = '#1a1a2e';
         ctx.beginPath(); ctx.roundRect(p.x + p.w * 0.32, p.y - 12, p.w * 0.15, 5, 1); ctx.fill();
         ctx.beginPath(); ctx.roundRect(p.x + p.w * 0.53, p.y - 12, p.w * 0.15, 5, 1); ctx.fill();
-    } else if (style === 'girl') {
-        ctx.fillStyle = '#1a1a2e';
-        ctx.beginPath(); ctx.ellipse(p.x + p.w * 0.05, p.y - 10, p.w * 0.1, p.h * 0.2, 0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(p.x + p.w * 0.95, p.y - 10, p.w * 0.1, p.h * 0.2, -0.3, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(p.x + p.w * 0.5, p.y - 22, p.w * 0.28, 0, Math.PI); ctx.fill();
-    }
     if (style !== 'police') {
         ctx.fillStyle = 'white';
         ctx.beginPath(); ctx.arc(p.x + p.w * 0.4, p.y - 8, 3.5, 0, Math.PI * 2); ctx.fill();

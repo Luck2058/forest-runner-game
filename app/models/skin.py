@@ -268,18 +268,6 @@ def seed_skins():
             'is_default': 0,
         },
         {
-            'name': '红衣萌娃',
-            'description': '穿着红色外套的可爱萌娃，人见人爱',
-            'skin_type': 'character',
-            'primary_color': '#FF69B4',
-            'secondary_color': '#FFB6C1',
-            'accent_color': '#FF1493',
-            'sprite_path': '',
-            'price': 220,
-            'sort_order': 17,
-            'is_default': 0,
-        },
-        {
             'name': '正义警长',
             'description': '维护森林正义的警长，威严帅气',
             'skin_type': 'character',
