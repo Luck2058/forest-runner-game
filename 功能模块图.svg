@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 520">
+  <defs>
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#00000022"/>
+    </filter>
+    <linearGradient id="rootGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1b5e20"/>
+      <stop offset="100%" stop-color="#2e7d32"/>
+    </linearGradient>
+    <linearGradient id="modGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#388e3c"/>
+      <stop offset="100%" stop-color="#43a047"/>
+    </linearGradient>
+    <linearGradient id="subGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#66bb6a"/>
+      <stop offset="100%" stop-color="#81c784"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="680" height="520" fill="#f1f8e9" rx="8"/>
+
+  <!-- 标题 -->
+  <text x="340" y="32" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18" font-weight="bold" fill="#1b5e20">森林酷跑游戏系统 — 功能模块图</text>
+
+  <!-- ===== 顶层根节点 ===== -->
+  <rect x="230" y="50" width="220" height="42" rx="10" fill="url(#rootGrad)" filter="url(#shadow)"/>
+  <text x="340" y="77" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="15" font-weight="bold" fill="#fff">🌲 森林酷跑游戏系统</text>
+
+  <!-- 顶层到5模块的连线 -->
+  <line x1="340" y1="92" x2="55" y2="130" stroke="#a5d6a7" stroke-width="2"/>
+  <line x1="340" y1="92" x2="183" y2="130" stroke="#a5d6a7" stroke-width="2"/>
+  <line x1="340" y1="92" x2="340" y2="130" stroke="#a5d6a7" stroke-width="2"/>
+  <line x1="340" y1="92" x2="497" y2="130" stroke="#a5d6a7" stroke-width="2"/>
+  <line x1="340" y1="92" x2="625" y2="130" stroke="#a5d6a7" stroke-width="2"/>
+
+  <!-- ===== 模块1: 用户管理 ===== -->
+  <rect x="10" y="132" width="90" height="36" rx="8" fill="url(#modGrad)" filter="url(#shadow)"/>
+  <text x="55" y="155" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="12" font-weight="bold" fill="#fff">👤 用户管理</text>
+
+  <line x1="55" y1="168" x2="55" y2="195" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="5" y="197" width="100" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="55" y="217" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#1b5e20">注册 / 登录</text>
+
+  <line x1="55" y1="229" x2="55" y2="255" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="5" y="257" width="100" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="55" y="277" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#1b5e20">个人中心</text>
+
+  <!-- ===== 模块2: 游戏核心 ===== -->
+  <rect x="133" y="132" width="100" height="36" rx="8" fill="url(#modGrad)" filter="url(#shadow)"/>
+  <text x="183" y="155" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="12" font-weight="bold" fill="#fff">🎮 游戏核心</text>
+
+  <line x1="183" y1="168" x2="183" y2="195" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="128" y="197" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="183" y="217" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">角色控制(跳跃/下滑)</text>
+
+  <line x1="183" y1="229" x2="183" y2="255" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="128" y="257" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="183" y="277" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">障碍物系统(5种)</text>
+
+  <line x1="183" y1="289" x2="183" y2="315" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="128" y="317" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="183" y="337" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">道具拾取(5种)</text>
+
+  <line x1="183" y1="349" x2="183" y2="375" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="128" y="377" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="183" y="397" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">AABB 碰撞检测</text>
+
+  <line x1="183" y1="409" x2="183" y2="435" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="128" y="437" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="183" y="457" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">动态难度(5阶段)</text>
+
+  <!-- ===== 模块3: 成绩排行 ===== -->
+  <rect x="290" y="132" width="100" height="36" rx="8" fill="url(#modGrad)" filter="url(#shadow)"/>
+  <text x="340" y="155" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="12" font-weight="bold" fill="#fff">🏆 成绩排行</text>
+
+  <line x1="340" y1="168" x2="340" y2="195" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="285" y="197" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="340" y="217" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">成绩提交(AJAX)</text>
+
+  <line x1="340" y1="229" x2="340" y2="255" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="285" y="257" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="340" y="277" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">历史成绩查询</text>
+
+  <line x1="340" y1="289" x2="340" y2="315" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="285" y="317" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="340" y="337" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">数据统计面板</text>
+
+  <line x1="340" y1="349" x2="340" y2="375" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="285" y="377" width="110" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="340" y="397" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">全球排行(分页)</text>
+
+  <!-- ===== 模块4: 道具商城 ===== -->
+  <rect x="450" y="132" width="94" height="36" rx="8" fill="url(#modGrad)" filter="url(#shadow)"/>
+  <text x="497" y="155" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="12" font-weight="bold" fill="#fff">🛒 道具商城</text>
+
+  <line x1="497" y1="168" x2="497" y2="195" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="445" y="197" width="104" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="497" y="217" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#1b5e20">道具购买 API</text>
+
+  <line x1="497" y1="229" x2="497" y2="255" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="445" y="257" width="104" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="497" y="277" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#1b5e20">背包管理</text>
+
+  <!-- ===== 模块5: 系统管理 ===== -->
+  <rect x="583" y="132" width="82" height="36" rx="8" fill="url(#modGrad)" filter="url(#shadow)"/>
+  <text x="624" y="155" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="12" font-weight="bold" fill="#fff">⚙ 系统管理</text>
+
+  <line x1="624" y1="168" x2="624" y2="195" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="580" y="197" width="88" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="624" y="217" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">公告管理</text>
+
+  <line x1="624" y1="229" x2="624" y2="255" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="580" y="257" width="88" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="624" y="277" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">后台面板</text>
+
+  <line x1="624" y1="289" x2="624" y2="315" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="580" y="317" width="88" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="624" y="337" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">前端展示</text>
+
+  <line x1="624" y1="349" x2="624" y2="375" stroke="#c8e6c9" stroke-width="1.5"/>
+  <rect x="580" y="377" width="88" height="32" rx="6" fill="url(#subGrad)" filter="url(#shadow)"/>
+  <text x="624" y="397" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="10.5" fill="#1b5e20">音效系统</text>
+
+  <!-- 底部说明 -->
+  <text x="340" y="510" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="11" fill="#999">
+    图：森林酷跑游戏系统功能模块图（5大模块 · 19项子功能）
+  </text>
+</svg>

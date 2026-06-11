@@ -1,0 +1,108 @@
+[
+  {
+    "index": 0,
+    "rows": [
+      [
+        "表名",
+        "说明",
+        "主要字段",
+        "关联"
+      ],
+      [
+        "user",
+        "用户表",
+        "id, username, nickname, password_hash, coin_balance, role, created_at",
+        "—"
+      ],
+      [
+        "score",
+        "成绩表",
+        "id, user_id, score, coins, distance, \ndifficulty, play_time, created_at",
+        "user.id"
+      ],
+      [
+        "skin",
+        "皮肤表",
+        "id, name, description, price, image_url",
+        "—"
+      ],
+      [
+        "user_skin",
+        "用户皮肤",
+        "id, user_id, skin_id, is_equipped",
+        "user.id, skin.id"
+      ],
+      [
+        "item",
+        "道具表",
+        "id, name, type, description, price, \nduration, icon",
+        "—"
+      ],
+      [
+        "user_item",
+        "用户道具",
+        "id, user_id, item_id, quantity",
+        "user.id, item.id"
+      ],
+      [
+        "notice",
+        "公告表",
+        "id, title, content, is_active, created_at",
+        "—"
+      ]
+    ]
+  },
+  {
+    "index": 1,
+    "rows": [
+      [
+        "姓名",
+        "岗位角色",
+        "具体工作内容",
+        "技术栈"
+      ],
+      [
+        "焦国坤",
+        "组长\nA岗 游戏核心",
+        "• 项目整体规划与进度管理\n• 功能模块图绘制与Word文档整合\n• GitHub仓库管理与代码合并\n• game.js主循环与状态管理\n• 动态难度系统(DIFFICULTY_STAGES)\n• 道具系统前端逻辑(powerup.js)\n• 游戏结束与结算逻辑",
+        "Git, Word, \nJavaScript, \nHTML5 Canvas"
+      ],
+      [
+        "丁巴达杰",
+        "B岗 美术交互",
+        "• 全局CSS样式与森林主题配色\n• SVG角色/障碍物/金币素材设计\n• Canvas 5种障碍物精细绘制\n  （树桩/石头/灌木/蘑菇）\n• Web Audio API 音效系统\n• 页面响应式布局适配",
+        "CSS3, SVG, \nCanvas, \nWeb Audio"
+      ],
+      [
+        "肖盼",
+        "C岗 Flask后端",
+        "• Flask工厂函数+蓝图模块化架构\n• 用户认证系统(注册/登录/登出)\n• Flask-Login会话管理+CSRF保护\n• 道具系统后端API(item蓝图)\n• 登录保护装饰器与权限控制",
+        "Flask, \nFlask-Login, \nFlask-WTF"
+      ],
+      [
+        "陈宇聪",
+        "D岗 数据库",
+        "• MySQL数据库表结构设计与建模\n• scores/user/skin/item/notice模型\n• 成绩提交/查询/排行榜API\n• 排行榜难度筛选+分页功能\n• 个人中心历史成绩与数据统计\n• 数据库SQL建表文件编写",
+        "MySQL, \nSQLAlchemy, \nPyMySQL"
+      ],
+      [
+        "廖锦源",
+        "E岗 测试文档",
+        "• 全功能系统测试与Bug记录\n• 游戏体验评估与改进建议反馈\n• 运行截图收集与整理\n• 演示流程设计与优化",
+        "Playwright, \n自动化测试"
+      ],
+      [
+        "陈星羽",
+        "E岗 测试文档",
+        "• 现场演示准备与流程演练\n• 项目说明文档素材整理\n• 演示录屏与操作录像\n• UI/UX体验优化建议",
+        "Office, \n录屏工具"
+      ],
+      [
+        "唐紫高",
+        "E岗 测试文档",
+        "• 单元测试用例编写与执行\n• 边界条件与异常场景测试\n• 测试报告整理\n• 项目优化建议汇总",
+        "Python, \n测试工具"
+      ]
+    ]
+  }
+]
