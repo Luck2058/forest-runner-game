@@ -14,6 +14,7 @@
         worldTime: 0,
         score: 0,
         distance: 0,
+        coins: 0,
         speed: 0.34,
         spawnTimer: 0,
         pickupTimer: 0,
@@ -22,6 +23,8 @@
         laneOffset: 0,
         jumpVelocity: 0,
         jumpHeight: 0,
+        landingSquash: 0,
+        wasGrounded: true,
         slideTimer: 0,
         energy: 0,
         shieldTimer: 0,
@@ -33,6 +36,7 @@
         trees: [],
         fireflies: [],
         particles: [],
+        floatingTexts: [],
         dom: {}
     };
 
@@ -59,15 +63,18 @@
         ForestRunner3D.canvas = document.getElementById('game3dCanvas');
         ForestRunner3D.ctx = ForestRunner3D.canvas.getContext('2d');
         ForestRunner3D.dom.score = document.getElementById('game3dScore');
+        ForestRunner3D.dom.distance = document.getElementById('game3dDistance');
+        ForestRunner3D.dom.coins = document.getElementById('game3dCoins');
         ForestRunner3D.dom.energy = document.getElementById('game3dEnergy');
         ForestRunner3D.dom.state = document.getElementById('game3dState');
-        ForestRunner3D.dom.speed = document.getElementById('game3dSpeed');
-        ForestRunner3D.dom.curve = document.getElementById('game3dCurve');
-        ForestRunner3D.dom.depth = document.getElementById('game3dDepth');
-        ForestRunner3D.dom.shield = document.getElementById('game3dShield');
+        ForestRunner3D.dom.shield = document.getElementById('game3dShieldStatus');
         ForestRunner3D.dom.startOverlay = document.getElementById('game3dStartOverlay');
+        ForestRunner3D.dom.pauseOverlay = document.getElementById('game3dPauseOverlay');
         ForestRunner3D.dom.overOverlay = document.getElementById('game3dOverOverlay');
         ForestRunner3D.dom.finalScore = document.getElementById('game3dFinalScore');
+        ForestRunner3D.dom.finalDistance = document.getElementById('game3dFinalDistance');
+        ForestRunner3D.dom.finalCoins = document.getElementById('game3dFinalCoins');
+        ForestRunner3D.dom.finalSpeed = document.getElementById('game3dFinalSpeed');
         ForestRunner3D.dom.finalNote = document.getElementById('game3dFinalNote');
         ForestRunner3D.dom.pauseBtn = document.getElementById('game3dPauseBtn');
         ForestRunner3D.dom.boostBtn = document.getElementById('game3dBoostBtn');
@@ -75,6 +82,8 @@
         document.getElementById('game3dStartBtn').addEventListener('click', start);
         document.getElementById('game3dRestartBtn').addEventListener('click', restart);
         document.getElementById('game3dResetBtn').addEventListener('click', restart);
+        document.getElementById('game3dResumeBtn').addEventListener('click', togglePause);
+        document.getElementById('game3dPauseRestartBtn').addEventListener('click', restart);
         ForestRunner3D.dom.pauseBtn.addEventListener('click', togglePause);
         ForestRunner3D.dom.boostBtn.addEventListener('click', boost);
 
@@ -113,6 +122,7 @@
         ForestRunner3D.worldTime = 0;
         ForestRunner3D.score = 0;
         ForestRunner3D.distance = 0;
+        ForestRunner3D.coins = 0;
         ForestRunner3D.speed = 0.34;
         ForestRunner3D.spawnTimer = 0.35;
         ForestRunner3D.pickupTimer = 0.5;
@@ -121,6 +131,8 @@
         ForestRunner3D.laneOffset = 0;
         ForestRunner3D.jumpVelocity = 0;
         ForestRunner3D.jumpHeight = 0;
+        ForestRunner3D.landingSquash = 0;
+        ForestRunner3D.wasGrounded = true;
         ForestRunner3D.slideTimer = 0;
         ForestRunner3D.energy = 0;
         ForestRunner3D.shieldTimer = 0;
@@ -130,6 +142,7 @@
         ForestRunner3D.obstacles = [];
         ForestRunner3D.pickups = [];
         ForestRunner3D.particles = [];
+        ForestRunner3D.floatingTexts = [];
 
         // 树木使用独立深度循环，让近景遮挡和远景森林一直滚动。
         ForestRunner3D.trees = [];
@@ -241,11 +254,12 @@
         const h = ForestRunner3D.height;
         const w = ForestRunner3D.width;
         const base = horizonY() + h * 0.04;
+        const offset = -((ForestRunner3D.distance * 0.9) % (w / 4));
         ctx.fillStyle = 'rgba(50, 115, 89, 0.38)';
         ctx.beginPath();
-        ctx.moveTo(0, base);
-        for (let i = 0; i <= 8; i += 1) {
-            const x = (w / 8) * i;
+        ctx.moveTo(-w * 0.25, base);
+        for (let i = -2; i <= 10; i += 1) {
+            const x = (w / 8) * i + offset;
             const y = base - h * (0.08 + (i % 3) * 0.035);
             ctx.lineTo(x + w * 0.06, y);
             ctx.lineTo(x + w * 0.13, base);
@@ -387,12 +401,19 @@
         const p = project(lane, PLAYER_Z, ForestRunner3D.jumpHeight);
         const size = 54 * p.scale;
         const sliding = ForestRunner3D.slideTimer > 0;
-        const bodyH = sliding ? size * 0.48 : size * 0.86;
-        const bodyY = p.y - bodyH * 0.62;
+        const runPhase = ForestRunner3D.worldTime * (ForestRunner3D.speed * 18 + 5);
+        const bob = sliding ? 0 : Math.sin(runPhase * 2) * size * 0.04;
+        const squash = ForestRunner3D.landingSquash * size * 0.12;
+        const bodyW = size * (sliding ? 0.88 : 0.66 + ForestRunner3D.landingSquash * 0.12);
+        const bodyH = size * (sliding ? 0.42 : 0.72 - ForestRunner3D.landingSquash * 0.08);
+        const bodyY = p.y - bodyH * 0.62 + bob + squash;
+        const headY = bodyY - size * (sliding ? 0.08 : 0.36);
+        const jumpTilt = clamp(ForestRunner3D.jumpVelocity, -1, 1) * -0.18;
+        const shadowScale = clamp(1 - ForestRunner3D.jumpHeight * 0.55, 0.42, 1);
 
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        ctx.fillStyle = `rgba(0, 0, 0, ${0.25 * shadowScale})`;
         ctx.beginPath();
-        ctx.ellipse(p.x, project(lane, PLAYER_Z).y + size * 0.34, size * 0.72, size * 0.2, 0, 0, Math.PI * 2);
+        ctx.ellipse(p.x, project(lane, PLAYER_Z).y + size * 0.34, size * 0.76 * shadowScale, size * 0.2 * shadowScale, 0, 0, Math.PI * 2);
         ctx.fill();
 
         if (ForestRunner3D.shieldTimer > 0) {
@@ -403,39 +424,101 @@
             ctx.stroke();
         }
 
-        ctx.fillStyle = COLORS.playerDark;
-        roundRect(ctx, p.x - size * 0.36, bodyY - size * 0.03, size * 0.72, bodyH, size * 0.13);
-        ctx.fill();
-        ctx.fillStyle = COLORS.player;
-        roundRect(ctx, p.x - size * 0.29, bodyY - size * 0.08, size * 0.58, bodyH * 0.82, size * 0.12);
-        ctx.fill();
+        ctx.save();
+        ctx.translate(p.x, bodyY);
+        ctx.rotate(jumpTilt);
 
-        if (!sliding) {
-            ctx.fillStyle = '#ffd36b';
-            ctx.beginPath();
-            ctx.arc(p.x, bodyY - size * 0.2, size * 0.22, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        ctx.strokeStyle = '#0d3c28';
-        ctx.lineWidth = Math.max(2, size * 0.08);
+        // 小狐狸尾巴：用大弧形和白色尾尖增强动物辨识度。
+        ctx.fillStyle = '#d7642b';
         ctx.beginPath();
-        ctx.moveTo(p.x - size * 0.16, bodyY + bodyH * 0.76);
-        ctx.lineTo(p.x - size * 0.34, bodyY + bodyH * 1.13);
-        ctx.moveTo(p.x + size * 0.16, bodyY + bodyH * 0.76);
-        ctx.lineTo(p.x + size * 0.34, bodyY + bodyH * 1.13);
+        ctx.ellipse(-bodyW * 0.58, bodyH * 0.02, size * 0.28, size * 0.52, -0.72, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff1d6';
+        ctx.beginPath();
+        ctx.ellipse(-bodyW * 0.75, -bodyH * 0.15, size * 0.12, size * 0.2, -0.72, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#e77832';
+        roundRect(ctx, -bodyW * 0.48, -bodyH * 0.45, bodyW, bodyH, size * 0.18);
+        ctx.fill();
+        ctx.fillStyle = '#fff1d6';
+        ctx.beginPath();
+        ctx.ellipse(-bodyW * 0.04, -bodyH * 0.13, bodyW * 0.24, bodyH * 0.32, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const legSwing = sliding ? 0 : Math.sin(runPhase) * size * 0.16;
+        ctx.strokeStyle = '#6b341c';
+        ctx.lineWidth = Math.max(3, size * 0.08);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-bodyW * 0.18, bodyH * 0.25);
+        ctx.lineTo(-bodyW * 0.34 - legSwing * 0.45, bodyH * 0.6 + Math.abs(legSwing) * 0.18);
+        ctx.moveTo(bodyW * 0.18, bodyH * 0.25);
+        ctx.lineTo(bodyW * 0.34 + legSwing * 0.45, bodyH * 0.6 + Math.abs(legSwing) * 0.18);
         ctx.stroke();
+
+        ctx.fillStyle = '#e77832';
+        ctx.beginPath();
+        ctx.arc(0, headY - bodyY, size * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 尖耳朵和白色脸颊让角色更像森林小狐狸。
+        ctx.fillStyle = '#d7642b';
+        ctx.beginPath();
+        ctx.moveTo(-size * 0.18, headY - bodyY - size * 0.2);
+        ctx.lineTo(-size * 0.33, headY - bodyY - size * 0.52);
+        ctx.lineTo(-size * 0.02, headY - bodyY - size * 0.32);
+        ctx.closePath();
+        ctx.moveTo(size * 0.18, headY - bodyY - size * 0.2);
+        ctx.lineTo(size * 0.33, headY - bodyY - size * 0.52);
+        ctx.lineTo(size * 0.02, headY - bodyY - size * 0.32);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#fff1d6';
+        ctx.beginPath();
+        ctx.ellipse(0, headY - bodyY + size * 0.07, size * 0.2, size * 0.13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#23160f';
+        ctx.beginPath();
+        ctx.arc(-size * 0.09, headY - bodyY - size * 0.03, size * 0.025, 0, Math.PI * 2);
+        ctx.arc(size * 0.09, headY - bodyY - size * 0.03, size * 0.025, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, headY - bodyY + size * 0.08, size * 0.03, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
 
     function drawObstacle(obstacle) {
         const p = project(LANES[obstacle.lane], obstacle.z, obstacle.kind === 'branch' ? 0.34 : 0);
+        if (obstacle.z > 0.68) {
+            drawDangerMarker(obstacle);
+        }
         if (obstacle.kind === 'branch') {
             drawBranch(p, obstacle);
-        } else if (obstacle.kind === 'gate') {
-            drawGate(p, obstacle);
+        } else if (obstacle.kind === 'crate') {
+            drawCrate(p, obstacle);
         } else {
             drawRockOrStump(p, obstacle);
         }
+    }
+
+    function drawDangerMarker(obstacle) {
+        const ctx = ForestRunner3D.ctx;
+        const front = project(LANES[obstacle.lane], Math.min(1, obstacle.z + 0.07));
+        const back = project(LANES[obstacle.lane], Math.max(0.05, obstacle.z - 0.07));
+        const halfFront = front.laneSpread * 0.34;
+        const halfBack = back.laneSpread * 0.28;
+        const alpha = clamp((obstacle.z - 0.68) / 0.32, 0, 1) * 0.42;
+        ctx.fillStyle = `rgba(255, 91, 65, ${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(back.x - halfBack, back.y);
+        ctx.lineTo(back.x + halfBack, back.y);
+        ctx.lineTo(front.x + halfFront, front.y);
+        ctx.lineTo(front.x - halfFront, front.y);
+        ctx.closePath();
+        ctx.fill();
     }
 
     function drawRockOrStump(p, obstacle) {
@@ -471,22 +554,29 @@
         ctx.fill();
     }
 
-    function drawGate(p) {
+    function drawCrate(p) {
         const ctx = ForestRunner3D.ctx;
-        const w = 76 * p.scale;
-        const h = 86 * p.scale;
-        ctx.strokeStyle = '#8a5a2b';
-        ctx.lineWidth = Math.max(4, 8 * p.scale);
+        const w = 68 * p.scale;
+        const h = 58 * p.scale;
+        ctx.fillStyle = 'rgba(0,0,0,0.22)';
         ctx.beginPath();
-        ctx.moveTo(p.x - w * 0.45, p.y + h * 0.34);
-        ctx.lineTo(p.x - w * 0.45, p.y - h * 0.5);
-        ctx.lineTo(p.x + w * 0.45, p.y - h * 0.5);
-        ctx.lineTo(p.x + w * 0.45, p.y + h * 0.34);
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(255, 214, 102, 0.75)';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y - h * 0.12, 10 * p.scale, 0, Math.PI * 2);
+        ctx.ellipse(p.x, p.y + h * 0.45, w * 0.68, h * 0.18, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = '#a9652c';
+        roundRect(ctx, p.x - w / 2, p.y - h * 0.45, w, h, Math.max(4, 7 * p.scale));
+        ctx.fill();
+        ctx.strokeStyle = '#6e3d1f';
+        ctx.lineWidth = Math.max(2, 4 * p.scale);
+        ctx.beginPath();
+        ctx.moveTo(p.x - w * 0.42, p.y - h * 0.32);
+        ctx.lineTo(p.x + w * 0.42, p.y + h * 0.42);
+        ctx.moveTo(p.x + w * 0.42, p.y - h * 0.32);
+        ctx.lineTo(p.x - w * 0.42, p.y + h * 0.42);
+        ctx.moveTo(p.x - w * 0.5, p.y - h * 0.05);
+        ctx.lineTo(p.x + w * 0.5, p.y - h * 0.05);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 231, 166, 0.42)';
+        ctx.fillRect(p.x - w * 0.36, p.y - h * 0.34, w * 0.5, h * 0.12);
     }
 
     function drawPickup(item) {
@@ -517,13 +607,19 @@
             ctx.closePath();
             ctx.fill();
         } else {
+            const spin = 0.42 + Math.abs(Math.sin(ForestRunner3D.worldTime * 5 + item.phase)) * 0.58;
+            const shineX = Math.cos(ForestRunner3D.worldTime * 5 + item.phase) * r * 0.28;
             ctx.fillStyle = COLORS.gold;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+            ctx.ellipse(p.x, p.y, r * spin, r, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.strokeStyle = '#a66b12';
             ctx.lineWidth = Math.max(2, r * 0.16);
             ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.72)';
+            ctx.beginPath();
+            ctx.ellipse(p.x + shineX, p.y - r * 0.2, r * 0.16, r * 0.42, 0.35, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 
@@ -539,8 +635,24 @@
         });
     }
 
+    function drawFloatingTexts() {
+        const ctx = ForestRunner3D.ctx;
+        ForestRunner3D.floatingTexts.forEach((text) => {
+            const alpha = clamp(text.life / text.maxLife, 0, 1);
+            ctx.globalAlpha = alpha;
+            ctx.font = `${Math.max(16, 22 * ForestRunner3D.ratio)}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.lineWidth = 4 * ForestRunner3D.ratio;
+            ctx.strokeStyle = 'rgba(42, 29, 13, 0.58)';
+            ctx.fillStyle = text.color;
+            ctx.strokeText(text.value, text.x, text.y);
+            ctx.fillText(text.value, text.x, text.y);
+            ctx.globalAlpha = 1;
+        });
+    }
+
     function spawnObstacle() {
-        const kinds = ['stump', 'stone', 'branch', 'gate'];
+        const kinds = ['stump', 'stone', 'crate', 'branch'];
         ForestRunner3D.obstacles.push({
             lane: Math.floor(Math.random() * 3),
             z: 0.04,
@@ -550,8 +662,14 @@
 
     function spawnPickup() {
         const roll = Math.random();
+        const blockedLanes = new Set(
+            ForestRunner3D.obstacles
+                .filter((obstacle) => obstacle.z < 0.32)
+                .map((obstacle) => obstacle.lane)
+        );
+        const openLanes = [0, 1, 2].filter((lane) => !blockedLanes.has(lane));
         ForestRunner3D.pickups.push({
-            lane: Math.floor(Math.random() * 3),
+            lane: openLanes.length ? openLanes[Math.floor(Math.random() * openLanes.length)] : Math.floor(Math.random() * 3),
             z: 0.05,
             type: roll > 0.86 ? 'shield' : roll > 0.58 ? 'crystal' : 'coin',
             phase: Math.random() * Math.PI * 2
@@ -617,6 +735,14 @@
                 ForestRunner3D.jumpVelocity = 0;
             }
         }
+
+        const grounded = ForestRunner3D.jumpHeight === 0;
+        if (grounded && !ForestRunner3D.wasGrounded) {
+            ForestRunner3D.landingSquash = 1;
+            spawnTrail('#e7c287', 10);
+        }
+        ForestRunner3D.wasGrounded = grounded;
+        ForestRunner3D.landingSquash = Math.max(0, ForestRunner3D.landingSquash - dt * 5.5);
     }
 
     function updateDepthObjects(dt, boostFactor) {
@@ -654,6 +780,11 @@
             particle.life -= dt;
         });
         ForestRunner3D.particles = ForestRunner3D.particles.filter((particle) => particle.life > 0);
+        ForestRunner3D.floatingTexts.forEach((text) => {
+            text.y -= 48 * dt * ForestRunner3D.ratio;
+            text.life -= dt;
+        });
+        ForestRunner3D.floatingTexts = ForestRunner3D.floatingTexts.filter((text) => text.life > 0);
     }
 
     function checkCollection() {
@@ -668,14 +799,18 @@
                 ForestRunner3D.shieldTimer = 6;
                 ForestRunner3D.energy = Math.min(MAX_ENERGY, ForestRunner3D.energy + 18);
                 burst('#75d8ff', 18);
+                addFloatingText('护盾', '#75d8ff');
             } else if (item.type === 'crystal') {
                 ForestRunner3D.energy = Math.min(MAX_ENERGY, ForestRunner3D.energy + 28);
                 ForestRunner3D.score += 80;
                 burst('#63e6be', 16);
+                addFloatingText('+能量', '#63e6be');
             } else {
+                ForestRunner3D.coins += 1;
                 ForestRunner3D.energy = Math.min(MAX_ENERGY, ForestRunner3D.energy + 7);
                 ForestRunner3D.score += 35;
                 burst('#ffd666', 12);
+                addFloatingText('+1', '#ffd666');
             }
         });
     }
@@ -689,7 +824,7 @@
             }
             const jumping = ForestRunner3D.jumpHeight > 0.36;
             const sliding = ForestRunner3D.slideTimer > 0;
-            const canAvoid = obstacle.kind === 'branch' ? sliding : obstacle.kind === 'gate' ? true : jumping;
+            const canAvoid = obstacle.kind === 'branch' ? sliding : jumping;
             if (canAvoid) {
                 ForestRunner3D.score += 55;
                 return;
@@ -723,6 +858,7 @@
         ForestRunner3D.obstacles.slice().sort((a, b) => a.z - b.z).forEach(drawObstacle);
         drawPlayer();
         drawParticles();
+        drawFloatingTexts();
         drawVignette();
         ctx.restore();
 
@@ -790,6 +926,19 @@
         ForestRunner3D.flash = 1;
     }
 
+    function addFloatingText(value, color) {
+        const lane = LANES[ForestRunner3D.laneIndex] + ForestRunner3D.laneOffset;
+        const p = project(lane, PLAYER_Z, ForestRunner3D.jumpHeight + 0.28);
+        ForestRunner3D.floatingTexts.push({
+            value,
+            color,
+            x: p.x,
+            y: p.y,
+            life: 0.85,
+            maxLife: 0.85
+        });
+    }
+
     function moveLane(direction) {
         if (!ForestRunner3D.running || ForestRunner3D.paused || ForestRunner3D.gameOver) {
             return;
@@ -836,6 +985,7 @@
         ForestRunner3D.running = true;
         ForestRunner3D.paused = false;
         ForestRunner3D.dom.startOverlay.classList.add('game3d-hidden');
+        ForestRunner3D.dom.pauseOverlay.classList.add('game3d-hidden');
         ForestRunner3D.dom.overOverlay.classList.add('game3d-hidden');
         ForestRunner3D.dom.pauseBtn.disabled = false;
         ForestRunner3D.dom.boostBtn.disabled = false;
@@ -852,8 +1002,12 @@
         ForestRunner3D.gameOver = true;
         ForestRunner3D.running = false;
         ForestRunner3D.dom.finalScore.textContent = Math.floor(ForestRunner3D.score).toString();
-        ForestRunner3D.dom.finalNote.textContent = `距离 ${Math.floor(ForestRunner3D.distance)}m，最高速度 ${(ForestRunner3D.speed / 0.34).toFixed(1)}x`;
+        ForestRunner3D.dom.finalDistance.textContent = `${Math.floor(ForestRunner3D.distance)}m`;
+        ForestRunner3D.dom.finalCoins.textContent = ForestRunner3D.coins.toString();
+        ForestRunner3D.dom.finalSpeed.textContent = `${(ForestRunner3D.speed / 0.34).toFixed(1)}x`;
+        ForestRunner3D.dom.finalNote.textContent = ForestRunner3D.coins >= 8 ? '金币路线很漂亮，适合继续打磨成挑战模式。' : '还可以多收集金币，下一局试试更冒险的路线。';
         ForestRunner3D.dom.overOverlay.classList.remove('game3d-hidden');
+        ForestRunner3D.dom.pauseOverlay.classList.add('game3d-hidden');
         ForestRunner3D.dom.pauseBtn.disabled = true;
         ForestRunner3D.dom.boostBtn.disabled = true;
         ForestRunner3D.shake = 1;
@@ -866,16 +1020,16 @@
         }
         ForestRunner3D.paused = !ForestRunner3D.paused;
         ForestRunner3D.dom.pauseBtn.textContent = ForestRunner3D.paused ? '继续' : '暂停';
+        ForestRunner3D.dom.pauseOverlay.classList.toggle('game3d-hidden', !ForestRunner3D.paused);
         updateHud(ForestRunner3D.paused ? '已暂停' : '进行中');
     }
 
     function updateHud(stateText) {
         ForestRunner3D.dom.score.textContent = Math.floor(ForestRunner3D.score).toString();
+        ForestRunner3D.dom.distance.textContent = Math.floor(ForestRunner3D.distance).toString();
+        ForestRunner3D.dom.coins.textContent = ForestRunner3D.coins.toString();
         ForestRunner3D.dom.energy.textContent = `${Math.floor(ForestRunner3D.energy)}%`;
         ForestRunner3D.dom.state.textContent = stateText;
-        ForestRunner3D.dom.speed.textContent = `${(ForestRunner3D.speed / 0.34).toFixed(1)}x`;
-        ForestRunner3D.dom.curve.textContent = curveAt(0.85).toFixed(2);
-        ForestRunner3D.dom.depth.textContent = `${Math.floor(ForestRunner3D.distance)}m`;
         ForestRunner3D.dom.shield.textContent = ForestRunner3D.shieldTimer > 0 ? `${ForestRunner3D.shieldTimer.toFixed(1)}s` : 'OFF';
     }
 

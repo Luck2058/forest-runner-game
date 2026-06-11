@@ -1,19 +1,20 @@
 {% extends "base.html" %}
-{% block title %}3D跑酷实验舱{% endblock %}
+{% block title %}3D跑酷实验版{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/game3d.css') }}">
 {% endblock %}
 
 {% block content %}
-<section class="game3d-page" aria-label="森林酷跑3D实验舱">
+<section class="game3d-page" aria-label="森林酷跑3D实验版">
     <div class="game3d-shell">
         <header class="game3d-topbar">
             <div>
                 <p class="game3d-kicker">Forest Runner 3D Lab</p>
-                <h1>森林酷跑 3D 实验舱</h1>
+                <h1>森林酷跑 3D 实验版</h1>
             </div>
             <div class="game3d-top-actions">
+                <span class="game3d-badge">未来扩展方向</span>
                 <a class="game3d-return" href="{{ url_for('game.game') }}">返回 2D 版本</a>
             </div>
         </header>
@@ -24,39 +25,41 @@
                 <strong id="game3dScore">0</strong>
             </div>
             <div class="game3d-meter">
-                <span>能量</span>
-                <strong id="game3dEnergy">0%</strong>
+                <span>距离</span>
+                <strong><span id="game3dDistance">0</span>m</strong>
+            </div>
+            <div class="game3d-meter">
+                <span>金币</span>
+                <strong id="game3dCoins">0</strong>
+            </div>
+            <div class="game3d-meter">
+                <span>护盾</span>
+                <strong id="game3dShieldStatus">OFF</strong>
             </div>
             <div class="game3d-meter">
                 <span>状态</span>
                 <strong id="game3dState">待开始</strong>
             </div>
             <div class="game3d-meter">
-                <span>速度</span>
-                <strong id="game3dSpeed">1.0x</strong>
+                <span>冲刺能量</span>
+                <strong id="game3dEnergy">0%</strong>
             </div>
         </div>
 
         <div class="game3d-stage">
             <canvas id="game3dCanvas" width="1120" height="630" aria-label="森林三车道3D跑酷画布"></canvas>
 
-            <div class="game3d-cockpit" aria-hidden="true">
-                <div class="cockpit-line"><span>CURVE</span><b id="game3dCurve">0.00</b></div>
-                <div class="cockpit-line"><span>DEPTH</span><b id="game3dDepth">READY</b></div>
-                <div class="cockpit-line"><span>SHIELD</span><b id="game3dShield">OFF</b></div>
-            </div>
-
             <div class="game3d-overlay" id="game3dStartOverlay">
                 <div class="game3d-panel">
-                    <p class="game3d-panel-label">3D Direction Prototype</p>
-                    <h2>冲进会转弯的森林赛道</h2>
-                    <p class="game3d-panel-copy">弯道、坡度、镜头倾斜、能量道具和近景遮挡已经接入，先用 Canvas 把 3D 跑酷的手感跑出来。</p>
+                    <p class="game3d-panel-label">3D Prototype</p>
+                    <h2>小狐狸冲进森林弯道</h2>
+                    <p class="game3d-panel-copy">收集金币和晶体，躲开树桩、石头与木箱。护盾能抵挡危险，能量满了可以短暂冲刺。</p>
                     <div class="game3d-actions">
-                        <button type="button" class="game3d-primary" id="game3dStartBtn">开始实验</button>
+                        <button type="button" class="game3d-primary" id="game3dStartBtn">开始游戏</button>
                         <a class="game3d-secondary" href="{{ url_for('game.game') }}">返回 2D</a>
                     </div>
                     <div class="game3d-keys" aria-label="键盘控制">
-                        <span>← / → 换道</span>
+                        <span>← / → 切换车道</span>
                         <span>空格 / ↑ 跳跃</span>
                         <span>↓ 滑铲</span>
                         <span>P 暂停</span>
@@ -65,10 +68,27 @@
                 </div>
             </div>
 
-            <div class="game3d-overlay game3d-hidden" id="game3dOverOverlay">
+            <div class="game3d-overlay game3d-hidden" id="game3dPauseOverlay">
                 <div class="game3d-panel">
+                    <p class="game3d-panel-label">Paused</p>
+                    <h2>森林暂停中</h2>
+                    <p class="game3d-panel-copy">休息一下。按 P 或点击继续按钮回到赛道。</p>
+                    <div class="game3d-actions">
+                        <button type="button" class="game3d-primary" id="game3dResumeBtn">继续游戏</button>
+                        <button type="button" class="game3d-secondary-button" id="game3dPauseRestartBtn">重新开始</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game3d-overlay game3d-hidden" id="game3dOverOverlay">
+                <div class="game3d-panel game3d-result-panel">
                     <p class="game3d-panel-label">Run Complete</p>
                     <h2>本局分数 <span id="game3dFinalScore">0</span></h2>
+                    <div class="game3d-result-grid">
+                        <div><span>距离</span><strong id="game3dFinalDistance">0m</strong></div>
+                        <div><span>金币</span><strong id="game3dFinalCoins">0</strong></div>
+                        <div><span>最高速度</span><strong id="game3dFinalSpeed">1.0x</strong></div>
+                    </div>
                     <p class="game3d-panel-copy" id="game3dFinalNote">森林实验数据已记录在本地画布中。</p>
                     <div class="game3d-actions">
                         <button type="button" class="game3d-primary" id="game3dRestartBtn">重新开始</button>

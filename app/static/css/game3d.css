@@ -42,9 +42,23 @@
     gap: 0.65rem;
 }
 
+.game3d-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(31, 122, 75, 0.28);
+    border-radius: 999px;
+    color: #184d32;
+    background: rgba(238, 255, 222, 0.78);
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
 .game3d-return,
 .game3d-controls a,
-.game3d-secondary {
+.game3d-secondary,
+.game3d-secondary-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -58,9 +72,13 @@
     font-weight: 800;
 }
 
+.game3d-secondary-button {
+    cursor: pointer;
+}
+
 .game3d-hud {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0.75rem;
     margin-bottom: 1rem;
 }
@@ -91,6 +109,14 @@
     font-variant-numeric: tabular-nums;
 }
 
+.game3d-meter:nth-child(3) strong {
+    color: #9d690b;
+}
+
+.game3d-meter:nth-child(4) strong {
+    color: #126d8d;
+}
+
 .game3d-stage {
     position: relative;
     overflow: hidden;
@@ -107,35 +133,6 @@
     min-height: 340px;
     max-height: min(72vh, 720px);
     background: #9fd3f5;
-}
-
-.game3d-cockpit {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: grid;
-    gap: 0.4rem;
-    width: min(210px, 34vw);
-    pointer-events: none;
-}
-
-.cockpit-line {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.65rem;
-    padding: 0.45rem 0.6rem;
-    border: 1px solid rgba(255, 255, 255, 0.34);
-    border-radius: 6px;
-    background: rgba(6, 29, 18, 0.52);
-    color: #eaffdf;
-    font-size: 0.78rem;
-    font-weight: 800;
-    box-shadow: 0 10px 22px rgba(6, 29, 18, 0.16);
-}
-
-.cockpit-line b {
-    color: #ffd96f;
-    font-variant-numeric: tabular-nums;
 }
 
 .game3d-overlay {
@@ -183,6 +180,40 @@
     line-height: 1.65;
 }
 
+.game3d-result-panel {
+    width: min(560px, 92vw);
+}
+
+.game3d-result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin: 0 0 1rem;
+}
+
+.game3d-result-grid div {
+    min-height: 76px;
+    padding: 0.75rem;
+    border: 1px solid rgba(23, 61, 42, 0.18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.game3d-result-grid span {
+    display: block;
+    color: #52735f;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.game3d-result-grid strong {
+    display: block;
+    margin-top: 0.22rem;
+    color: #123622;
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+}
+
 .game3d-actions,
 .game3d-controls {
     display: flex;
@@ -194,7 +225,8 @@
 
 .game3d-primary,
 .game3d-controls button,
-.game3d-touch button {
+.game3d-touch button,
+.game3d-secondary-button {
     min-height: 44px;
     padding: 0.72rem 1.05rem;
     border: 0;
@@ -208,7 +240,8 @@
 
 .game3d-primary:hover,
 .game3d-controls button:hover,
-.game3d-touch button:hover {
+.game3d-touch button:hover,
+.game3d-secondary-button:hover {
     background: #17623d;
 }
 
@@ -217,7 +250,8 @@
 .game3d-return:focus-visible,
 .game3d-controls a:focus-visible,
 .game3d-secondary:focus-visible,
-.game3d-touch button:focus-visible {
+.game3d-touch button:focus-visible,
+.game3d-secondary-button:focus-visible {
     outline: 3px solid #f6c453;
     outline-offset: 2px;
 }
@@ -288,12 +322,6 @@
         min-height: 390px;
     }
 
-    .game3d-cockpit {
-        top: 0.7rem;
-        right: 0.7rem;
-        width: min(185px, 48vw);
-    }
-
     .game3d-touch {
         display: grid;
     }
@@ -304,11 +332,11 @@
         grid-template-columns: 1fr;
     }
 
-    .game3d-cockpit {
-        display: none;
-    }
-
     .game3d-panel {
         padding: 1.1rem;
+    }
+
+    .game3d-result-grid {
+        grid-template-columns: 1fr;
     }
 }
