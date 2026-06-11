@@ -35,10 +35,11 @@ function updateScore(frame) {
     score   += CONFIG.SCORE_PER_FRAME;           // 每帧 +1 基础分
 }
 
-/** 收集金币时调用，增加金币数和奖励分 */
+/** 收集金币时调用，增加金币数和奖励分（支持双倍金币道具） */
 function addCoin() {
-    coins++;
-    score += CONFIG.COIN_SCORE;                 // 每个金币 +10 分
+    const multiplier = (typeof getCoinMultiplier === 'function') ? getCoinMultiplier() : 1;
+    coins += multiplier;
+    score += CONFIG.COIN_SCORE * multiplier;
 }
 
 // ============================================================

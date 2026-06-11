@@ -44,28 +44,32 @@ class Score(db.Model):
     # ------------------------------------------------------------------ #
 
     @classmethod
-    def get_global_ranking(cls, limit=10):
+    def get_global_ranking(cls, limit=10, difficulty=None, page=None):
         """
         获取全服排行榜（每个用户只取最高分）
-        返回按最高分降序排列的字典列表，包含排名、昵称、最高分等
+        参数：
+            limit       - 每页条数
+            difficulty  - 按难度筛选：'easy' / 'normal' / 'hard' / None(全部)
+            page        - 页码，None 时返回全部
+        返回：
+            list 或 (list, total, total_pages)
         """
         # 避免循环导入，在方法内部导入 User
         from app.models.user import User
 
-        # 子查询：每个用户的最高分/最高金币/最大距离
-        subq = (
-            db.session.query(
-                cls.user_id,
-                func.max(cls.score).label('best_score'),
-                func.max(cls.coins).label('best_coins'),
-                func.max(cls.distance).label('best_distance')
-            )
-            .group_by(cls.user_id)
-            .subquery()
+        # 子查询：每个用户的最高分/最高金币/最大距离（按难度筛选）
+        q = db.session.query(
+            cls.user_id,
+            func.max(cls.score).label('best_score'),
+            func.max(cls.coins).label('best_coins'),
+            func.max(cls.distance).label('best_distance')
         )
+        if difficulty and difficulty in ('easy', 'normal', 'hard'):
+            q = q.filter(cls.difficulty == difficulty)
+        subq = q.group_by(cls.user_id).subquery()
 
         # 关联用户表，取昵称
-        rows = (
+        base_query = (
             db.session.query(
                 subq.c.user_id,
                 subq.c.best_score,
@@ -76,20 +80,32 @@ class Score(db.Model):
             )
             .join(User, User.id == subq.c.user_id)
             .order_by(subq.c.best_score.desc())
-            .limit(limit)
-            .all()
         )
 
+        # 计算总数（分页时需要）
+        if page is not None:
+            total = base_query.count()
+            total_pages = max(1, (total + limit - 1) // limit)
+            rows = base_query.offset((page - 1) * limit).limit(limit).all()
+        else:
+            rows = base_query.limit(limit).all()
+            total = len(rows)
+            total_pages = 1
+
         result = []
+        offset = (page - 1) * limit if page else 0
         for i, row in enumerate(rows, start=1):
             result.append({
-                'rank':          i,
+                'rank':          offset + i,
                 'user_id':       row.user_id,
                 'nickname':      row.nickname or row.username,
                 'best_score':    row.best_score,
                 'best_coins':    row.best_coins,
                 'distance':      row.best_distance,
             })
+
+        if page is not None:
+            return result, total, total_pages
         return result
 
     @classmethod

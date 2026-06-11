@@ -28,6 +28,9 @@
         </div>
     </div>
 
+    <!-- 道具激活状态栏 -->
+    <div class="powerup-hud" id="powerupHud" style="display:none;"></div>
+
     <!-- ===== Canvas 游戏画布 ===== -->
     <div class="canvas-wrap">
         <canvas id="gameCanvas" width="800" height="300"></canvas>
@@ -42,6 +45,17 @@
                     🎮 开始游戏
                 </button>
                 <p class="key-hint">空格 / ↑ 跳跃 &nbsp;|&nbsp; ↓ 下滑躲避 &nbsp;|&nbsp; P 暂停</p>
+                <!-- 道具功能说明 -->
+                <div class="powerup-guide">
+                    <p class="guide-title">🎁 道具说明</p>
+                    <div class="guide-items">
+                        <span class="guide-item"><span class="guide-icon" style="background:#FFD93D">⭐</span> 无敌星 — 免疫一次碰撞</span>
+                        <span class="guide-item"><span class="guide-icon" style="background:#FF6B6B">🧲</span> 磁铁 — 自动吸附金币 5秒</span>
+                        <span class="guide-item"><span class="guide-icon" style="background:#6BCB77">💰</span> 双倍金币 — 金币翻倍 5秒</span>
+                        <span class="guide-item"><span class="guide-icon" style="background:#4D96FF">🔽</span> 缩小药水 — 体积减半 7秒</span>
+                        <span class="guide-item"><span class="guide-icon" style="background:#9B59B6">⏱</span> 慢速时钟 — 减速50% 3秒</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -68,6 +82,7 @@
                     <button class="btn btn-start" onclick="restartGame()">🔄 再来一局</button>
                     <a href="{{ url_for('score.rank') }}" class="btn btn-rank">🏆 查看排行</a>
                 </div>
+                <p class="key-hint" style="margin-top:0.8rem;font-size:0.8rem;">点击按钮重新开始，空格键不会重开哦</p>
             </div>
         </div>
     </div>
@@ -96,6 +111,15 @@
         <span class="key">P</span> 暂停/继续 &nbsp;
         <span class="key">R</span> 重新开始
     </div>
+
+    <!-- ===== 道具功能说明 ===== -->
+    <div class="key-guide powerup-legend">
+        <span class="guide-inline"><span style="color:#FFD93D">⭐</span> 无敌:免疫碰撞</span>&nbsp;
+        <span class="guide-inline"><span style="color:#FF6B6B">🧲</span> 磁铁:吸金5s</span>&nbsp;
+        <span class="guide-inline"><span style="color:#6BCB77">💰</span> 双倍:金币x2</span>&nbsp;
+        <span class="guide-inline"><span style="color:#4D96FF">🔽</span> 缩小:体形减半</span>&nbsp;
+        <span class="guide-inline"><span style="color:#9B59B6">⏱</span> 减速:慢速3s</span>
+    </div>
 </div>
 {% endblock %}
 
@@ -105,6 +129,7 @@
 <script src="{{ url_for('static', filename='js/player.js') }}"></script>    <!-- 1 玩家角色模块 -->
 <script src="{{ url_for('static', filename='js/game_character.js') }}"></script>  <!-- 1.5 游戏内角色独立绘制（覆盖player.js） -->
 <script src="{{ url_for('static', filename='js/obstacle.js') }}"></script>   <!-- 2 障碍物&金币&背景&粒子模块 -->
+<script src="{{ url_for('static', filename='js/powerup.js') }}"></script>   <!-- 2.5 道具系统模块 -->
 <script src="{{ url_for('static', filename='js/score.js') }}"></script>      <!-- 3 分数统计模块 -->
 <script src="{{ url_for('static', filename='js/api.js') }}"></script>        <!-- 4 后端接口模块 -->
 <script src="{{ url_for('static', filename='js/audio.js') }}"></script>      <!-- 5 【B岗新增】音效系统模块 -->

@@ -78,13 +78,20 @@ const player = {
 // 初始化 / 重置玩家状态（供 game.js 的 initGame() 调用）
 // ============================================================
 function initPlayer() {
+    player.x            = CONFIG.PLAYER_X;
     player.y            = CONFIG.GROUND_Y - CONFIG.PLAYER_H;
+    player.w            = CONFIG.PLAYER_W;
+    player.h            = CONFIG.PLAYER_H;
     player.vy           = 0;
     player.onGround     = true;
     player.jumpCount    = 0;
     player.isSliding    = false;
     player.slideTimer   = 0;
     player.slideCooldown = 0;
+    // 清除道具可能残留的尺寸缓存
+    player._origW = undefined;
+    player._origH = undefined;
+    player.invincible = false;
 }
 
 // ============================================================
@@ -113,7 +120,7 @@ function jump() {
 // 下滑动作（按住 ↓ 键趴下躲避空中障碍物）
 // ============================================================
 
-/** 开始下滑：角色高度缩小，底部保持贴地 */
+/** 开始下滑：角色高度缩小，宽度变大，碰撞体与绘制一致 */
 function startSlide() {
     if (gameState !== 'running') return;
     // 已经在下滑中，或冷却中，忽略
@@ -124,19 +131,26 @@ function startSlide() {
     player.isSliding  = true;
     player.slideTimer = 0;
 
-    // 缩小碰撞高度：高度变为原来的 SLIDE_H_RATIO
-    const newH = Math.floor(player.h * CONFIG.SLIDE_H_RATIO);
-    player.y = CONFIG.GROUND_Y - newH;
+    // 保存原始宽高（供 endSlide 恢复）
+    player._origW = player.w;
+    player._origH = player.h;
+
+    // 更新碰撞体：宽度+15（趴下变宽），高度缩至40%
+    player.w = player.w + 15;
+    player.h = Math.floor(CONFIG.PLAYER_H * CONFIG.SLIDE_H_RATIO);
+    player.y = CONFIG.GROUND_Y - player.h;
 }
 
-/** 结束下滑：恢复原始高度 */
+/** 结束下滑：恢复原始宽高 */
 function endSlide() {
     if (!player.isSliding) return;
 
     player.isSliding      = false;
     player.slideCooldown  = CONFIG.SLIDE_COOLDOWN;
 
-    // 恢复原始碰撞高度
+    // 恢复原始碰撞体尺寸
+    player.w = player._origW || CONFIG.PLAYER_W;
+    player.h = player._origH || CONFIG.PLAYER_H;
     player.y = CONFIG.GROUND_Y - player.h;
 }
 
@@ -158,14 +172,26 @@ function updateSlide() {
 
 /** 更新玩家物理（重力 + 落地检测），每帧调用 */
 function updatePlayerPhysics() {
+    // 动态重力：跳跃顶部（vy 接近 0）使用轻重力，制造"滞空"手感
+    // 上升中且速度绝对值小于阈值时 → 轻重力
+    let gravity;
+    if (!player.onGround && player.vy < 0 && player.vy > -3) {
+        // 接近跳跃顶点，使用轻重力让角色"飘"一下
+        gravity = CONFIG.GRAVITY_PEAK;
+    } else if (!player.onGround && player.vy >= 0 && player.vy < 2) {
+        // 刚过顶点下落的瞬间，也用轻重力，延长滞空
+        gravity = CONFIG.GRAVITY_PEAK;
+    } else {
+        gravity = CONFIG.GRAVITY;
+    }
+
     // 重力加速
-    player.vy += CONFIG.GRAVITY;
+    player.vy += gravity;
     player.y  += player.vy;
 
-    // 落地检测（根据当前实际高度判断——下滑时高度变小）
-    const currentH = player.isSliding ? Math.floor(CONFIG.PLAYER_H * CONFIG.SLIDE_H_RATIO) : player.h;
-    if (player.y >= CONFIG.GROUND_Y - currentH) {
-        player.y        = CONFIG.GROUND_Y - currentH;
+    // 落地检测（player.h 已在下滑/恢复时动态更新）
+    if (player.y >= CONFIG.GROUND_Y - player.h) {
+        player.y        = CONFIG.GROUND_Y - player.h;
         player.vy       = 0;
         player.onGround = true;
         player.jumpCount = 0;
@@ -187,8 +213,7 @@ function drawPlayer() {
 
 /** 绘制趴下姿态 */
 function drawPlayerSliding(p) {
-    const slideW = p.w + 15;   // 趴下后变宽
-    const slideH = Math.floor(CONFIG.PLAYER_H * CONFIG.SLIDE_H_RATIO);
+    // p.w 和 p.h 已在 startSlide() 中更新为趴下尺寸
 
     // 只有当前皮肤配置了 sprite_path 时才用 SVG 素材
     if (playerSkin.sprite_path) {
@@ -196,9 +221,9 @@ function drawPlayerSliding(p) {
         if (sprite) {
             ctx.save();
             // 水平翻转 + 压扁效果模拟趴下
-            ctx.translate(p.x + slideW / 2, CONFIG.GROUND_Y - slideH + slideH / 2);
+            ctx.translate(p.x + p.w / 2, CONFIG.GROUND_Y - p.h + p.h / 2);
             ctx.scale(1.4, 0.5);   // 变宽变扁
-            ctx.drawImage(sprite, -p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.drawImage(sprite, -CONFIG.PLAYER_W / 2, -CONFIG.PLAYER_H / 2, CONFIG.PLAYER_W, CONFIG.PLAYER_H);
             ctx.restore();
             return;
         }
@@ -208,19 +233,19 @@ function drawPlayerSliding(p) {
     // 身体：扁平椭圆
     ctx.fillStyle = playerSkin.primary_color;
     ctx.beginPath();
-    ctx.roundRect(p.x - 5, CONFIG.GROUND_Y - slideH, slideW, slideH, 5);
+    ctx.roundRect(p.x - 5, CONFIG.GROUND_Y - p.h, p.w, p.h, 5);
     ctx.fill();
 
     // 趴下的眼睛（半闭状）
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.ellipse(p.x + slideW * 0.7, CONFIG.GROUND_Y - slideH * 0.5, 6, 3, -0.2, 0, Math.PI * 2);
+    ctx.ellipse(p.x + p.w * 0.7, CONFIG.GROUND_Y - p.h * 0.5, 6, 3, -0.2, 0, Math.PI * 2);
     ctx.fill();
 
     // 背心
     ctx.fillStyle = playerSkin.accent_color;
     ctx.globalAlpha = 0.7;
-    ctx.fillRect(p.x + slideW * 0.3, CONFIG.GROUND_Y - slideH - 4, slideW * 0.5, 5);
+    ctx.fillRect(p.x + p.w * 0.3, CONFIG.GROUND_Y - p.h - 4, p.w * 0.5, 5);
     ctx.globalAlpha = 1;
 }
 

@@ -31,6 +31,11 @@
             <div class="stat-label">游戏次数</div>
         </div>
         <div class="stat-card">
+            <div class="stat-icon">📏</div>
+            <div class="stat-value" id="bestDist">-</div>
+            <div class="stat-label">最远距离</div>
+        </div>
+        <div class="stat-card">
             <div class="stat-icon">👛</div>
             <div class="stat-value">{{ user.coin_balance or 0 }}</div>
             <div class="stat-label">金币余额</div>
@@ -68,11 +73,18 @@ function loadMyScores() {
             if (data.success && data.scores.length > 0) {
                 const scores = data.scores;
 
-                // 更新统计
-                document.getElementById('bestScore').textContent = Math.max(...scores.map(s => s.score));
-                document.getElementById('totalCoins').textContent = scores.reduce((a, s) => a + s.coins, 0);
-                document.getElementById('gameCount').textContent = scores.length + ' 次';
-                document.getElementById('bestDist').textContent = Math.max(...scores.map(s => s.distance)) + 'm';
+                // 更新统计（安全判断，防止元素不存在时报错）
+                const bestScoreEl = document.getElementById('bestScore');
+                if (bestScoreEl) bestScoreEl.textContent = Math.max(...scores.map(s => s.score));
+
+                const totalCoinsEl = document.getElementById('totalCoins');
+                if (totalCoinsEl) totalCoinsEl.textContent = scores.reduce((a, s) => a + s.coins, 0);
+
+                const gameCountEl = document.getElementById('gameCount');
+                if (gameCountEl) gameCountEl.textContent = scores.length + ' 次';
+
+                const bestDistEl = document.getElementById('bestDist');
+                if (bestDistEl) bestDistEl.textContent = Math.max(...scores.map(s => s.distance)) + 'm';
 
                 // 渲染历史列表
                 const listEl = document.getElementById('scoreList');

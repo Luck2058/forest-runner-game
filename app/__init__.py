@@ -55,6 +55,10 @@ def create_app(config_name='default'):
     from app.routes.admin import admin_bp
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
+    # 注册道具蓝图
+    from app.routes.item import item_bp
+    app.register_blueprint(item_bp, url_prefix='/item')
+
     # 注册主页路由（不带前缀）
     from app.routes import main_bp
     app.register_blueprint(main_bp)
@@ -62,8 +66,10 @@ def create_app(config_name='default'):
     # 在应用上下文中创建数据库表（开发阶段使用）
     with app.app_context():
         db.create_all()
-        # 初始化预置皮肤数据
+        # 初始化预置数据
         from app.models.skin import seed_skins
         seed_skins()
+        from app.models.item import seed_items
+        seed_items()
 
     return app

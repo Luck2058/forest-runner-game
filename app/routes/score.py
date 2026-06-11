@@ -18,24 +18,37 @@ score_bp = Blueprint('score', __name__)
 def rank():
     """
     排行榜页面（GET /score/rank）
-    从数据库查询全服前 20 名最高分并渲染页面
+    支持 ?difficulty=easy|normal|hard 按难度筛选
     """
-    scores = Score.get_global_ranking(limit=20)
-    return render_template('rank.html', scores=scores)
+    difficulty = request.args.get('difficulty', None)
+    scores = Score.get_global_ranking(limit=20, difficulty=difficulty)
+    return render_template('rank.html', scores=scores, current_difficulty=difficulty or 'all')
 
 
 @score_bp.route('/api/rank')
 def api_rank():
     """
     排行榜 JSON 接口（GET /score/api/rank）
-    供前端 AJAX 调用，返回 JSON 格式排行榜
-    参数：?limit=20（可选，默认20）
+    参数：
+        ?difficulty=easy|normal|hard  按难度筛选（可选）
+        ?page=1&limit=10            分页（可选）
     """
-    limit  = request.args.get('limit', 20, type=int)
-    # limit 最大不超过 100，防止恶意请求
-    limit  = min(limit, 100)
-    scores = Score.get_global_ranking(limit=limit)
-    return jsonify({'success': True, 'scores': scores})
+    limit      = request.args.get('limit', 10, type=int)
+    limit      = min(limit, 100)
+    difficulty = request.args.get('difficulty', None)
+    page       = request.args.get('page', 1, type=int)
+
+    result, total, total_pages = Score.get_global_ranking(
+        limit=limit, difficulty=difficulty, page=page
+    )
+    return jsonify({
+        'success':     True,
+        'scores':      result,
+        'total':       total,
+        'total_pages': total_pages,
+        'page':        page,
+        'difficulty':  difficulty
+    })
 
 
 @score_bp.route('/submit', methods=['POST'])

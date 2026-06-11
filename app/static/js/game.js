@@ -32,40 +32,54 @@ let gameSpeed  = CONFIG.OBS_SPEED; // 当前游戏速度（会随时间增加）
 let currentDifficulty = 'normal';
 
 // ============================================================
-// 难度配置预设（影响游戏参数）
+// 难度配置预设（降低难度，更平滑的体验）
 // ============================================================
 const DIFFICULTY_PRESETS = {
     easy: {
-        OBS_SPEED:         2.5,
-        SPEED_UP_AMOUNT:   0.08,
-        OBS_INTERVAL_MIN: 140,
-        OBS_INTERVAL_MAX: 240,
-        AIR_OBS_CHANCE:    0.10,
-        COIN_INTERVAL_MIN:  50,
-        COIN_INTERVAL_MAX: 100,
+        OBS_SPEED:         2.0,
+        SPEED_UP_AMOUNT:   0.04,
+        OBS_INTERVAL_MIN: 160,
+        OBS_INTERVAL_MAX: 260,
+        AIR_OBS_CHANCE:    0.08,
+        COIN_INTERVAL_MIN:  40,
+        COIN_INTERVAL_MAX:  90,
         label: '简单',
     },
     normal: {
-        OBS_SPEED:         3.5,
-        SPEED_UP_AMOUNT:   0.12,
-        OBS_INTERVAL_MIN: 100,
-        OBS_INTERVAL_MAX: 180,
-        AIR_OBS_CHANCE:    0.25,
-        COIN_INTERVAL_MIN:  60,
-        COIN_INTERVAL_MAX: 120,
+        OBS_SPEED:         3.0,
+        SPEED_UP_AMOUNT:   0.06,
+        OBS_INTERVAL_MIN: 130,
+        OBS_INTERVAL_MAX: 220,
+        AIR_OBS_CHANCE:    0.15,
+        COIN_INTERVAL_MIN:  50,
+        COIN_INTERVAL_MAX: 110,
         label: '普通',
     },
     hard: {
-        OBS_SPEED:         5,
-        SPEED_UP_AMOUNT:   0.20,
-        OBS_INTERVAL_MIN: 70,
-        OBS_INTERVAL_MAX: 140,
-        AIR_OBS_CHANCE:    0.35,
-        COIN_INTERVAL_MIN:  70,
-        COIN_INTERVAL_MAX: 140,
+        OBS_SPEED:         4.2,
+        SPEED_UP_AMOUNT:   0.10,
+        OBS_INTERVAL_MIN:  95,
+        OBS_INTERVAL_MAX: 170,
+        AIR_OBS_CHANCE:    0.25,
+        COIN_INTERVAL_MIN:  60,
+        COIN_INTERVAL_MAX: 130,
         label: '困难',
     },
 };
+
+// ============================================================
+// 动态难度阶段（根据游戏时长分阶段调整）
+// ============================================================
+const DIFFICULTY_STAGES = [
+    { untilFrame: 1800, speedMultiplier: 1.0,  obsIntervalBonus: 30, airChanceBonus: -0.05 },  // 0~30秒：热身
+    { untilFrame: 3600, speedMultiplier: 1.15, obsIntervalBonus: 15, airChanceBonus: -0.02 },  // 30~60秒：逐渐加速
+    { untilFrame: 6000, speedMultiplier: 1.3,  obsIntervalBonus: 0,  airChanceBonus: 0     },  // 60~100秒：正常节奏
+    { untilFrame: 9000, speedMultiplier: 1.5,  obsIntervalBonus: -10, airChanceBonus: 0.05  },  // 100~150秒：加速
+    { untilFrame: Infinity, speedMultiplier: 1.7, obsIntervalBonus: -20, airChanceBonus: 0.08 }, // 150秒+：高难度
+];
+
+/** 当前激活阶段索引 */
+let currentStage = 0;
 
 // ============================================================
 // 游戏初始化 / 重置（调用各子模块的 init 函数）
@@ -74,10 +88,12 @@ function initGame() {
     gameState  = 'idle';
     frameCount = 0;
     gameSpeed  = CONFIG.OBS_SPEED;
+    currentStage = 0;
 
     // 调用各子模块的重置函数
     initPlayer();        // ← player.js
     initObstacles();     // ← obstacle.js
+    initPowerups();      // ← powerup.js
     initScore();         // ← score.js
 
     // 刷新 HUD 显示
@@ -90,13 +106,35 @@ function initGame() {
 function update() {
     frameCount++;
 
-    // ------ 1. 速度提升（随时间加速，有上限）------
-    if (frameCount % CONFIG.SPEED_UP_INTERVAL === 0) {
-        gameSpeed += CONFIG.SPEED_UP_AMOUNT;
-        if (gameSpeed > CONFIG.MAX_SPEED) {
-            gameSpeed = CONFIG.MAX_SPEED;
+    // ------ 1. 动态难度阶段（根据游戏时长切换）------
+    while (currentStage < DIFFICULTY_STAGES.length && frameCount > DIFFICULTY_STAGES[currentStage].untilFrame) {
+        currentStage++;
+        if (currentStage < DIFFICULTY_STAGES.length) {
+            const stage = DIFFICULTY_STAGES[currentStage];
+            console.log(`[难度] 进入阶段 ${currentStage + 1}，速度倍率 x${stage.speedMultiplier}`);
         }
     }
+
+    // 应用当前阶段的难度参数
+    const stage = DIFFICULTY_STAGES[Math.min(currentStage, DIFFICULTY_STAGES.length - 1)];
+
+    // 基础速度随帧数缓慢递增
+    if (frameCount % CONFIG.SPEED_UP_INTERVAL === 0) {
+        gameSpeed += CONFIG.SPEED_UP_AMOUNT;
+        if (gameSpeed > CONFIG.MAX_SPEED) gameSpeed = CONFIG.MAX_SPEED;
+    }
+
+    // 应用阶段倍率到运行时参数
+    let effectiveSpeed = gameSpeed * stage.speedMultiplier;
+
+    // 道具慢速时钟效果（减速因子）
+    if (typeof getSlowdownFactor === 'function') {
+        effectiveSpeed *= getSlowdownFactor();
+    }
+
+    const effectiveObsIntervalMin = Math.max(60, CONFIG.OBS_INTERVAL_MIN + stage.obsIntervalBonus);
+    const effectiveObsIntervalMax = Math.max(100, CONFIG.OBS_INTERVAL_MAX + stage.obsIntervalBonus);
+    const effectiveAirChance = Math.min(0.4, Math.max(0.05, CONFIG.AIR_OBS_CHANCE + stage.airChanceBonus));
 
     // ------ 2. 玩家物理（重力 + 跳跃 + 下滑）------
     updatePlayerPhysics();   // ← player.js
@@ -105,24 +143,28 @@ function update() {
     // ------ 3. 分数计算 ------
     updateScore(frameCount); // ← score.js
 
-    // ------ 4. 生成障碍物 ------
-    generateObstacle();      // ← obstacle.js
+    // ------ 4. 生成障碍物（使用阶段调整后的间隔）------
+    generateObstacle(effectiveObsIntervalMin, effectiveObsIntervalMax, effectiveAirChance, effectiveSpeed);
 
     // ------ 5. 移动障碍物并检测碰撞 ------
-    if (updateObstacles()) { // ← obstacle.js（返回 true = 碰撞）
+    if (updateObstacles(effectiveSpeed)) {
         triggerGameOver();
         return;
     }
 
     // ------ 6. 金币生成 + 收集检测 ------
-    generateCoin();          // ← obstacle.js
-    const collected = updateCoins(); // ← obstacle.js
+    generateCoin();
+    const collected = updateCoins(effectiveSpeed);
     for (let i = 0; i < collected; i++) {
-        addCoin();           // ← score.js
+        addCoin();           // ← score.js（内部会检查道具效果）
     }
 
+    // ------ 6.5 道具生成 + 收集 ------
+    if (typeof generatePowerup === 'function') generatePowerup();
+    if (typeof updatePowerups === 'function') updatePowerups(effectiveSpeed);
+
     // ------ 7. 背景滚动 ------
-    updateBackground();      // ← obstacle.js
+    updateBackground(effectiveSpeed);
 
     // ------ 8. 刷新 HUD ------
     updateHUD();             // ← score.js
@@ -163,6 +205,9 @@ function render() {
     // ---- 玩家角色 ----
     drawPlayer();             // ← player.js
 
+    // ---- 道具 ----
+    if (typeof drawPowerups === 'function') drawPowerups();
+
     // 【B岗新增】粒子特效
     if (typeof updateAndDrawParticles === 'function') updateAndDrawParticles();
 
@@ -187,6 +232,10 @@ function triggerGameOver() {
 
     // 【B岗】停止背景音乐
     if (typeof stopBGM === 'function') stopBGM();
+
+    // 清除道具效果
+    if (typeof deactivateAllPowerups === 'function') deactivateAllPowerups();
+    if (typeof updatePowerupHUD === 'function') updatePowerupHUD();
 
     // 填充结算面板数据
     showFinalScore();         // ← score.js
@@ -278,9 +327,11 @@ document.addEventListener('keydown', function(e) {
     // 空格或 ↑ ：跳跃
     if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
-        if (gameState === 'idle' || gameState === 'over') {
-            if (gameState === 'idle') startGame();
-            else restartGame();
+        if (gameState === 'idle') {
+            startGame();
+        } else if (gameState === 'over') {
+            // 死亡后不响应空格重开，防止误触；玩家需点击"再来一局"按钮
+            return;
         } else {
             jump();              // ← player.js
         }
@@ -291,6 +342,9 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         if (gameState === 'idle') {
             startGame();
+        } else if (gameState === 'over') {
+            // 死亡后不响应，防止误触
+            return;
         } else {
             startSlide();         // ← player.js
         }

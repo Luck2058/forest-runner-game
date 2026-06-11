@@ -382,6 +382,30 @@ img { max-width: 100%; }
 .hud-label { font-size: 0.75rem; color: var(--green-light); }
 .hud-value { font-size: 1.3rem; color: var(--white); font-weight: bold; }
 
+/* ---- 道具激活状态栏 ---- */
+.powerup-hud {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    background: rgba(0,0,0,0.15);
+    flex-wrap: wrap;
+}
+.pw-badge {
+    display: inline-block;
+    padding: 0.15rem 0.7rem;
+    border-radius: 12px;
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    animation: pwPulse 1s ease-in-out infinite;
+}
+@keyframes pwPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
 .canvas-wrap {
     position: relative;
     background: #87CEEB; /* 天空蓝 */
@@ -468,6 +492,17 @@ img { max-width: 100%; }
     color: var(--text-mid);
     font-size: 0.9rem;
 }
+.key-guide.powerup-legend {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+.guide-inline {
+    display: inline-block;
+    background: rgba(0,0,0,0.04);
+    border-radius: 10px;
+    padding: 0.15rem 0.5rem;
+}
 .key {
     display: inline-block;
     background: var(--white);
@@ -477,6 +512,39 @@ img { max-width: 100%; }
     font-size: 0.85rem;
     color: var(--green-dark);
     box-shadow: 0 2px 0 var(--green-light);
+}
+
+/* 道具功能说明（开始画面） */
+.powerup-guide {
+    margin-top: 1rem;
+    text-align: center;
+}
+.powerup-guide .guide-title {
+    font-size: 0.95rem;
+    color: var(--green-pale);
+    margin-bottom: 0.5rem;
+}
+.powerup-guide .guide-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    font-size: 0.8rem;
+    color: var(--green-light);
+}
+.powerup-guide .guide-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.powerup-guide .guide-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
 }
 
 /* ============================================================
@@ -522,6 +590,65 @@ img { max-width: 100%; }
 .empty-tip { text-align: center; padding: 2rem; color: var(--text-mid); }
 
 .rank-actions { display: flex; gap: 1rem; justify-content: center; }
+
+/* ---- 难度筛选按钮栏 ---- */
+.rank-filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.4rem 1.2rem;
+    border: 2px solid var(--green-main);
+    background: var(--white);
+    color: var(--green-dark);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover { background: var(--green-pale); }
+.filter-btn.active {
+    background: var(--green-main);
+    color: var(--white);
+    font-weight: bold;
+}
+
+/* ---- 分页导航 ---- */
+.rank-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+}
+
+.page-btn {
+    padding: 0.4rem 1rem;
+    border: 2px solid var(--green-light);
+    background: var(--white);
+    color: var(--green-dark);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) { background: var(--green-pale); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.page-info {
+    color: var(--text-mid);
+    font-size: 0.9rem;
+    min-width: 80px;
+    text-align: center;
+}
 
 /* ============================================================
    个人中心页面

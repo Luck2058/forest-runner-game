@@ -8,6 +8,14 @@
         <p>跑得最远的森林冒险家</p>
     </div>
 
+    <!-- 难度筛选按钮 -->
+    <div class="rank-filter-bar">
+        <button class="filter-btn {% if current_difficulty == 'all' %}active{% endif %}" data-diff="all">🌍 全部</button>
+        <button class="filter-btn {% if current_difficulty == 'easy' %}active{% endif %}" data-diff="easy">🌸 简单</button>
+        <button class="filter-btn {% if current_difficulty == 'normal' %}active{% endif %}" data-diff="normal">🌲 普通</button>
+        <button class="filter-btn {% if current_difficulty == 'hard' %}active{% endif %}" data-diff="hard">🔥 困难</button>
+    </div>
+
     <!-- 前三名特殊展示 -->
     {% if scores|length >= 3 %}
     <div class="top3-podium">
@@ -37,7 +45,7 @@
     {% endif %}
 
     <!-- 完整排行榜表格 -->
-    <div class="rank-table-wrap">
+    <div class="rank-table-wrap" id="rankTableWrap">
         <table class="rank-table">
             <thead>
                 <tr>
@@ -48,14 +56,14 @@
                     <th>距离</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="rankTableBody">
                 {% for item in scores %}
                 <tr class="{% if loop.index <= 3 %}top-row{% endif %}">
                     <td class="rank-num">
                         {% if loop.index == 1 %}🥇
                         {% elif loop.index == 2 %}🥈
                         {% elif loop.index == 3 %}🥉
-                        {% else %}{{ loop.index }}
+                        {% else %}{{ item.rank }}
                         {% endif %}
                     </td>
                     <td class="rank-name">
@@ -78,9 +86,20 @@
         </table>
     </div>
 
+    <!-- 分页导航 -->
+    <div class="rank-pagination" id="rankPagination">
+        <button class="page-btn" id="pagePrev" disabled>◀ 上一页</button>
+        <span class="page-info" id="pageInfo">第 1 页</span>
+        <button class="page-btn" id="pageNext">下一页 ▶</button>
+    </div>
+
     <div class="rank-actions">
         <a href="{{ url_for('game.game') }}" class="btn btn-start">🎮 去刷分</a>
-        <button class="btn btn-outline" onclick="location.reload()">🔄 刷新榜单</button>
+        <button class="btn btn-outline" id="refreshBtn">🔄 刷新榜单</button>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/rank.js') }}"></script>
 {% endblock %}

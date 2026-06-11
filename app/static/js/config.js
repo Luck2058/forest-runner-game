@@ -24,32 +24,33 @@ const CONFIG = {
     PLAYER_X:       60,
     PLAYER_W:       40,
     PLAYER_H:       50,
-    JUMP_FORCE:    -14,       // 跳跃初速度（负数=向上）
-    GRAVITY:         0.6,     // 重力加速度
+    JUMP_FORCE:    -13,       // 跳跃初速度（负数=向上）
+    GRAVITY:         0.48,    // 重力加速度（降低，增加滞空感）
+    GRAVITY_PEAK:    0.28,    // 跳跃顶部（vy接近0时）的轻重力，制造"滞空"手感
 
     // ---- 障碍物设置 ----
     OBS_W_MIN:      20,
     OBS_W_MAX:      35,
     OBS_H_MIN:      35,
     OBS_H_MAX:      70,
-    OBS_SPEED:      3.5,      // 初始移动速度
+    OBS_SPEED:      3.0,      // 初始移动速度（降低）
 
     // ---- 金币设置 ----
     COIN_R:         12,
-    COIN_SPEED:     3.5,
+    COIN_SPEED:     3.0,      // 与障碍物速度一致
 
     // ---- 难度随时间加速 ----
-    SPEED_UP_INTERVAL: 500,   // 每500帧（~8秒）加速一次
-    SPEED_UP_AMOUNT:   0.12,  // 每次加速幅度
-    MAX_SPEED:          10,   // 速度上限
+    SPEED_UP_INTERVAL: 600,   // 每600帧（~10秒）加速一次（更平滑）
+    SPEED_UP_AMOUNT:   0.06,  // 每次加速幅度（降低）
+    MAX_SPEED:          7.5,  // 速度上限（降低，避免太变态）
 
     // ---- 障碍物生成间隔（帧）----
-    OBS_INTERVAL_MIN:  90,
-    OBS_INTERVAL_MAX:  160,
+    OBS_INTERVAL_MIN:  130,   // 最小间隔增大
+    OBS_INTERVAL_MAX:  220,
 
     // ---- 金币生成间隔（帧）----
-    COIN_INTERVAL_MIN: 60,
-    COIN_INTERVAL_MAX: 120,
+    COIN_INTERVAL_MIN: 50,
+    COIN_INTERVAL_MAX: 110,
 
     // ---- 分数规则 ----
     SCORE_PER_FRAME: 1,
@@ -61,7 +62,7 @@ const CONFIG = {
     SLIDE_COOLDOWN:     10,     // 下滑结束后冷却帧数
 
     // ---- 空中障碍物设置 ----
-    AIR_OBS_CHANCE:     0.30,   // 空中障碍物出现概率
+    AIR_OBS_CHANCE:     0.15,   // 空中障碍物出现概率（降低）
     AIR_OBS_H_MIN:      25,
     AIR_OBS_H_MAX:      35,
     AIR_OBS_GROUND_GAP: 55,     // 空中障碍物离地面最小距离
