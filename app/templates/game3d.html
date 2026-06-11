@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}3D跑酷实验{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game3d.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="game3d-page" aria-label="森林酷跑3D实验原型">
+    <div class="game3d-shell">
+        <header class="game3d-topbar">
+            <div>
+                <p class="game3d-kicker">Forest Runner Lab</p>
+                <h1>森林酷跑 3D 实验原型</h1>
+            </div>
+            <a class="game3d-return" href="{{ url_for('game.game') }}">返回 2D 版本</a>
+        </header>
+
+        <div class="game3d-hud" aria-live="polite">
+            <div class="game3d-meter">
+                <span>分数</span>
+                <strong id="game3dScore">0</strong>
+            </div>
+            <div class="game3d-meter">
+                <span>状态</span>
+                <strong id="game3dState">待开始</strong>
+            </div>
+            <div class="game3d-meter">
+                <span>速度</span>
+                <strong id="game3dSpeed">1.0x</strong>
+            </div>
+        </div>
+
+        <div class="game3d-stage">
+            <canvas id="game3dCanvas" width="960" height="540" aria-label="森林三车道跑酷画布"></canvas>
+
+            <div class="game3d-overlay" id="game3dStartOverlay">
+                <div class="game3d-panel">
+                    <p class="game3d-panel-label">2.5D Prototype</p>
+                    <h2>穿过透视森林跑道</h2>
+                    <div class="game3d-actions">
+                        <button type="button" class="game3d-primary" id="game3dStartBtn">开始</button>
+                        <a class="game3d-secondary" href="{{ url_for('game.game') }}">返回 2D</a>
+                    </div>
+                    <div class="game3d-keys" aria-label="键盘控制">
+                        <span>←</span><span>→</span><span>空格</span><span>↑</span><span>P</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game3d-overlay game3d-hidden" id="game3dOverOverlay">
+                <div class="game3d-panel">
+                    <p class="game3d-panel-label">Game Over</p>
+                    <h2>本局分数 <span id="game3dFinalScore">0</span></h2>
+                    <div class="game3d-actions">
+                        <button type="button" class="game3d-primary" id="game3dRestartBtn">重新开始</button>
+                        <a class="game3d-secondary" href="{{ url_for('game.game') }}">返回 2D</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game3d-controls">
+            <button type="button" id="game3dPauseBtn" disabled>暂停</button>
+            <button type="button" id="game3dResetBtn">重新开始</button>
+            <a href="{{ url_for('main.index') }}">返回首页</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game3d.js') }}"></script>
+{% endblock %}

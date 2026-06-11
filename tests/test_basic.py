@@ -42,8 +42,14 @@ class TestBasicRoutes:
         assert response.status_code == 200
 
     def test_game_page(self, client):
-        """游戏页应该返回 200"""
+        """游戏页需要登录，未登录时应跳转登录页"""
         response = client.get('/game/')
+        assert response.status_code == 302
+        assert '/auth/login' in response.location
+
+    def test_game3d_page(self, client):
+        """3D 跑酷实验页应该返回 200"""
+        response = client.get('/game3d')
         assert response.status_code == 200
 
     def test_rank_page(self, client):
@@ -51,24 +57,37 @@ class TestBasicRoutes:
         response = client.get('/score/rank')
         assert response.status_code == 200
 
+    def test_rank_alias(self, client):
+        """/rank 应跳转到原排行榜路径"""
+        response = client.get('/rank')
+        assert response.status_code == 302
+        assert response.location.endswith('/score/rank')
+
+    def test_profile_alias(self, client):
+        """/profile 应跳转到原个人中心路径"""
+        response = client.get('/profile')
+        assert response.status_code == 302
+        assert response.location.endswith('/game/profile')
+
     def test_admin_page(self, client):
-        """后台管理页应该返回 200（当前无权限拦截）"""
+        """后台管理页需要管理员权限，未登录时应跳转登录页"""
         response = client.get('/admin/')
-        assert response.status_code == 200
+        assert response.status_code == 302
+        assert '/auth/login' in response.location
 
 
 class TestScoreAPI:
     """测试成绩 API"""
 
     def test_submit_score_json(self, client):
-        """成绩提交接口应接受 JSON 并返回 success"""
+        """未登录提交成绩应返回 401"""
         response = client.post(
             '/score/submit',
             json={'score': 1000, 'coins': 10, 'distance': 300},
         )
-        assert response.status_code == 200
+        assert response.status_code == 401
         data = response.get_json()
-        assert data['success'] is True
+        assert data['success'] is False
 
     def test_submit_score_empty(self, client):
         """成绩提交接口：空数据应返回 400"""
@@ -76,11 +95,11 @@ class TestScoreAPI:
         assert response.status_code == 400
 
     def test_my_scores(self, client):
-        """个人成绩接口应该返回列表"""
+        """未登录查询个人成绩应返回 401"""
         response = client.get('/score/my-scores')
-        assert response.status_code == 200
+        assert response.status_code == 401
         data = response.get_json()
-        assert 'scores' in data
+        assert data['success'] is False
 
 
 class TestLogin:

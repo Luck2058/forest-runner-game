@@ -1,0 +1,221 @@
+.game3d-page {
+    min-height: calc(100vh - 180px);
+    padding: 1.5rem;
+    background:
+        linear-gradient(180deg, rgba(170, 220, 255, 0.45), rgba(25, 87, 51, 0.14)),
+        #e8f4df;
+}
+
+.game3d-shell {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+.game3d-topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.game3d-kicker {
+    margin: 0 0 0.25rem;
+    color: #2f6f59;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.game3d-topbar h1 {
+    margin: 0;
+    color: #173d2a;
+    font-size: clamp(1.55rem, 3vw, 2.35rem);
+    line-height: 1.15;
+}
+
+.game3d-return,
+.game3d-controls a,
+.game3d-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.7rem 1rem;
+    border: 1px solid rgba(23, 61, 42, 0.24);
+    border-radius: 8px;
+    color: #173d2a;
+    background: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.game3d-hud {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.game3d-meter {
+    min-height: 72px;
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(32, 79, 52, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 12px 28px rgba(23, 61, 42, 0.12);
+}
+
+.game3d-meter span {
+    display: block;
+    color: #52735f;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.game3d-meter strong {
+    display: block;
+    margin-top: 0.2rem;
+    color: #122e20;
+    font-size: 1.5rem;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.game3d-stage {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(23, 61, 42, 0.24);
+    border-radius: 8px;
+    background: #9fd3f5;
+    box-shadow: 0 24px 60px rgba(15, 59, 37, 0.22);
+}
+
+#game3dCanvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 320px;
+    max-height: min(68vh, 620px);
+    background: #9fd3f5;
+}
+
+.game3d-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: linear-gradient(180deg, rgba(16, 54, 35, 0.18), rgba(6, 24, 15, 0.54));
+}
+
+.game3d-hidden {
+    display: none;
+}
+
+.game3d-panel {
+    width: min(420px, 92vw);
+    padding: 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    border-radius: 8px;
+    background: rgba(248, 255, 241, 0.92);
+    box-shadow: 0 20px 48px rgba(10, 35, 22, 0.22);
+    text-align: center;
+}
+
+.game3d-panel-label {
+    margin: 0 0 0.3rem;
+    color: #3f7d52;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.game3d-panel h2 {
+    margin: 0 0 1rem;
+    color: #173d2a;
+    font-size: 1.55rem;
+    line-height: 1.25;
+}
+
+.game3d-actions,
+.game3d-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+}
+
+.game3d-primary,
+.game3d-controls button {
+    min-height: 44px;
+    padding: 0.7rem 1.05rem;
+    border: 0;
+    border-radius: 8px;
+    color: #ffffff;
+    background: #1f7a4b;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(31, 122, 75, 0.26);
+}
+
+.game3d-primary:hover,
+.game3d-controls button:hover {
+    background: #17623d;
+}
+
+.game3d-primary:focus-visible,
+.game3d-controls button:focus-visible,
+.game3d-return:focus-visible,
+.game3d-controls a:focus-visible,
+.game3d-secondary:focus-visible {
+    outline: 3px solid #f6c453;
+    outline-offset: 2px;
+}
+
+.game3d-controls button:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+}
+
+.game3d-keys {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 1rem;
+}
+
+.game3d-keys span {
+    min-width: 42px;
+    padding: 0.35rem 0.55rem;
+    border: 1px solid rgba(23, 61, 42, 0.2);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #173d2a;
+    font-weight: 800;
+}
+
+.game3d-controls {
+    margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+    .game3d-page {
+        padding: 1rem 0.75rem;
+    }
+
+    .game3d-topbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .game3d-hud {
+        grid-template-columns: 1fr;
+    }
+
+    #game3dCanvas {
+        min-height: 340px;
+    }
+}
