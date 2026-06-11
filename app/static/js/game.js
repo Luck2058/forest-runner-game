@@ -372,29 +372,44 @@ document.addEventListener('keyup', function(e) {
 // Canvas 自适应（移动端画面适配）
 // ============================================================
 const DESIGN_W = 800;       // 设计宽度（内部坐标系）
-const DESIGN_H = 300;       // 设计高度
-const ASPECT   = DESIGN_H / DESIGN_W; // 高宽比 = 0.375
+const DESIGN_H = 300;       // 桌面端设计高度
+const DESIGN_H_MOBILE = 550; // 移动端设计高度（竖屏大画面）
+const ASPECT_DESKTOP = DESIGN_H / DESIGN_W;    // 桌面宽高比 = 0.375
+const ASPECT_MOBILE  = DESIGN_H_MOBILE / DESIGN_W; // 移动宽高比 ≈ 0.6875
 
 /** 根据窗口大小动态调整 Canvas 显示尺寸 */
 function resizeCanvas() {
     const wrap = document.querySelector('.canvas-wrap');
     if (!wrap) return;
 
+    const isMobile = window.innerWidth <= 480;
     const maxWidth = Math.min(wrap.clientWidth, 800);
-    // 手机横屏时限制最大高度为视口50%
-    const maxHeight = window.innerHeight * 0.5;
-    const widthByHeight = maxHeight / ASPECT;
 
-    let displayWidth;
-    if (window.innerWidth <= 480) {
-        // 手机：尽量撑满宽度，但限制高度不超过50vh
-        displayWidth = Math.min(maxWidth, widthByHeight);
+    // 移动端：让 Canvas 撑满屏幕宽度，高度按移动端比例自适应
+    if (isMobile) {
+        // 使用移动端设计比例，让画面更高（竖屏大画面）
+        const displayWidth = maxWidth;
+        const displayHeight = displayWidth * ASPECT_MOBILE;
+
+        // 更新 Canvas 内部坐标系（高度变大，游戏内容自动适配）
+        canvas.width  = DESIGN_W;
+        canvas.height = DESIGN_H_MOBILE;
+
+        // 同步更新 CONFIG.GROUND_Y（地面线始终在 Canvas 底部上方 50px）
+        CONFIG.GROUND_Y = canvas.height - 50;
+
+        canvas.style.width  = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
     } else {
-        displayWidth = maxWidth;
-    }
+        // 桌面端：保持原有 800×300 设计比例
+        const displayWidth = maxWidth;
+        canvas.width  = DESIGN_W;
+        canvas.height = DESIGN_H;
+        CONFIG.GROUND_Y = DESIGN_H - 50;
 
-    canvas.style.width  = displayWidth + 'px';
-    canvas.style.height = (displayWidth * ASPECT) + 'px';
+        canvas.style.width  = displayWidth + 'px';
+        canvas.style.height = (displayWidth * ASPECT_DESKTOP) + 'px';
+    }
 }
 
 /** 检测是否为移动端/触屏设备 */

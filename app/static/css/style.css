@@ -975,21 +975,25 @@ img { max-width: 100%; }
     .feature-card { padding: 0.8rem; }
 
     /* ======== 游戏页面核心适配 ======== */
-    .game-page { padding: 0.3rem 0.3rem 0.8rem; max-width: 100%; }
+    .game-page { padding: 0.15rem 0.15rem 0.4rem; max-width: 100%; }
 
-    /* HUD 紧凑 */
+    /* HUD 更紧凑 */
     .game-hud {
-        gap: 0.25rem;
-        padding: 0.35rem 0.5rem;
-        border-radius: 8px 8px 0 0;
+        gap: 0.2rem;
+        padding: 0.25rem 0.4rem;
+        border-radius: 6px 6px 0 0;
         justify-content: space-around;
     }
-    .hud-label { font-size: 0.6rem; }
-    .hud-value { font-size: 0.9rem; }
+    .hud-label { font-size: 0.55rem; }
+    .hud-value { font-size: 0.8rem; }
     .hud-item { min-width: auto; }
 
-    /* Canvas 容器 */
-    .canvas-wrap { border-width: 2px; border-radius: 0; }
+    /* Canvas 容器 —— 撑满全宽，无圆角 */
+    .canvas-wrap {
+        border-width: 2px;
+        border-radius: 0;
+        margin: 0;
+    }
     #gameCanvas { image-rendering: auto; }
 
     /* 开始/结束覆盖层 */
