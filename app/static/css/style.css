@@ -937,29 +937,165 @@ img { max-width: 100%; }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 响应式适配（B岗增强） */
-@media (max-width: 600px) {
-    .navbar { padding: 0.6rem 1rem; }
-    .brand-name { font-size: 1.2rem; }
-    .nav-link { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
-    .hero-section { min-height: 360px; padding: 2rem 1rem; }
-    .game-title { font-size: 2.5rem; }
-    .top3-podium { gap: 0.5rem; }
-    .game-hud { gap: 0.5rem; padding: 0.6rem 0.8rem; }
-    .hud-value { font-size: 1.1rem; }
-    .diff-buttons { gap: 0.5rem; }
-    .diff-btn { min-width: 75px; padding: 0.5rem 0.7rem; }
-    .diff-icon { font-size: 1.2rem; }
-    .diff-desc { display: none; }
-    .game-controls { gap: 0.5rem; }
-    .game-page { padding: 0.5rem 1rem 1rem; }
-    .auth-card { padding: 1.5rem; }
+/* ============================================================
+   游戏页面移动端触屏提示
+   ============================================================ */
+.touch-hint {
+    font-size: 0.85rem;
+    color: #FFD93D;
+    margin-top: 0.8rem;
+    animation: touchPulse 1.5s ease-in-out infinite;
+}
+@keyframes touchPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
 }
 
-/* 中等屏幕适配 */
-@media (min-width: 601px) and (max-width: 900px) {
-    .hero-section { min-height: 400px; }
+/* ============================================================
+   响应式适配（B岗增强）— 手机端 (≤480px)
+   ============================================================ */
+@media (max-width: 480px) {
+    /* 导航栏 */
+    .navbar { padding: 0.4rem 0.6rem; flex-wrap: wrap; }
+    .brand-name { font-size: 1rem; letter-spacing: 0; }
+    .logo-icon { font-size: 1.2rem; }
+    .navbar-menu { gap: 0.15rem; flex-wrap: wrap; justify-content: flex-end; }
+    .nav-link { padding: 0.2rem 0.45rem; font-size: 0.72rem; border-radius: 12px; }
+
+    /* 首页 */
+    .hero-section { min-height: 320px; padding: 1.5rem 1rem; }
+    .game-title { font-size: 2rem; }
+    .game-subtitle { font-size: 0.9rem; }
+    .hero-buttons { gap: 0.5rem; }
+    .hero-buttons .btn { font-size: 0.85rem; padding: 0.5rem 1.2rem; }
+    .floating-deco { display: none; }
+    .features-section { padding: 1.5rem 1rem; }
+    .section-title { font-size: 1.3rem; margin-bottom: 1rem; }
+    .features-grid { grid-template-columns: 1fr; gap: 0.6rem; }
+    .feature-card { padding: 0.8rem; }
+
+    /* ======== 游戏页面核心适配 ======== */
+    .game-page { padding: 0.3rem 0.3rem 0.8rem; max-width: 100%; }
+
+    /* HUD 紧凑 */
+    .game-hud {
+        gap: 0.25rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: 8px 8px 0 0;
+        justify-content: space-around;
+    }
+    .hud-label { font-size: 0.6rem; }
+    .hud-value { font-size: 0.9rem; }
+    .hud-item { min-width: auto; }
+
+    /* Canvas 容器 */
+    .canvas-wrap { border-width: 2px; border-radius: 0; }
+    #gameCanvas { image-rendering: auto; }
+
+    /* 开始/结束覆盖层 */
+    .overlay-icon { font-size: 2rem; }
+    .overlay-content h2 { font-size: 1.2rem; }
+    .overlay-content p { font-size: 0.75rem; margin-bottom: 0.6rem; }
+    .result-stats { gap: 0.8rem; margin: 0.5rem 0 0.8rem; }
+    .stat-item span { font-size: 0.68rem; }
+    .stat-item strong { font-size: 1.1rem; }
+    .overlay-buttons { gap: 0.4rem; }
+    .overlay-buttons .btn { font-size: 0.8rem; padding: 0.45rem 0.8rem; border-radius: 20px; }
+    .key-hint { display: none; }
+    .touch-hint { display: block !important; font-size: 0.72rem; }
+
+    /* 道具说明紧凑 */
+    .powerup-guide { margin-top: 0.5rem; }
+    .powerup-guide .guide-title { font-size: 0.75rem; }
+    .powerup-guide .guide-items { gap: 0.15rem 0.5rem; font-size: 0.65rem; }
+    .powerup-guide .guide-icon { width: 16px; height: 16px; font-size: 9px; }
+
+    /* 控制按钮栏 */
+    .game-controls {
+        gap: 0.3rem;
+        padding: 0.4rem 0.5rem;
+        border-radius: 0 0 8px 8px;
+    }
+    .game-controls .btn {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.55rem;
+        border-radius: 14px;
+    }
+    .difficulty-bar { width: 100%; justify-content: center; gap: 0.2rem; }
+    .diff-label { font-size: 0.68rem; }
+    .difficulty-bar .diff-btn { font-size: 0.65rem; padding: 0.22rem 0.45rem; }
+
+    /* 键盘指南 (隐藏，显示触屏提示) */
+    .key-guide { font-size: 0.65rem; margin-top: 0.3rem; display: none; }
+    .key-guide.powerup-legend { display: block; font-size: 0.62rem; margin-top: 0.25rem; }
+    .key { font-size: 0.65rem; padding: 0.1rem 0.3rem; border-width: 1px; }
+
+    /* 结果难度标签 */
+    .result-difficulty { font-size: 0.7rem; padding: 0.18rem 0.6rem; }
+
+    /* 道具HUD */
+    .powerup-hud { gap: 0.2rem; padding: 0.15rem 0.3rem; }
+    .pw-badge { font-size: 0.6rem; padding: 0.08rem 0.4rem; }
+
+    /* 认证页 */
+    .auth-card { padding: 1.2rem; border-radius: 14px; }
+    .auth-header h2 { font-size: 1.2rem; }
+    .auth-icon { font-size: 2rem; }
+    .form-group input { padding: 0.5rem 0.8rem; font-size: 0.9rem; }
+
+    /* 排行榜 */
+    .rank-page { padding: 1rem 0.8rem; }
+    .rank-table th, .rank-table td { padding: 0.4rem 0.5rem; font-size: 0.75rem; }
+    .podium-avatar { font-size: 1.8rem; }
+    .podium-block { font-size: 1.3rem; padding: 0.3rem 0.8rem; }
+    .podium-1 .podium-block { font-size: 1.6rem; }
+
+    /* 个人中心 */
+    .profile-page { padding: 1rem; }
+    .profile-card { flex-direction: column; text-align: center; padding: 1.2rem; }
+    .profile-avatar { font-size: 2.5rem; }
+    .profile-name { font-size: 1.3rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .stat-card { padding: 0.8rem; }
+    .stat-value { font-size: 1.3rem; }
+
+    /* 后台管理 */
+    .admin-page { padding: 1rem 0.6rem; }
+    .admin-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .admin-stat-card { padding: 0.8rem; }
+    .astat-value { font-size: 1.3rem; }
+    .admin-table th, .admin-table td { padding: 0.4rem 0.5rem; font-size: 0.72rem; }
+
+    /* 底部 */
+    .footer { padding: 0.8rem 0.5rem; font-size: 0.7rem; border-top-width: 1px; }
+}
+
+/* ============================================================
+   平板适配 (481px ~ 768px)
+   ============================================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+    .navbar { padding: 0.5rem 1rem; }
+    .brand-name { font-size: 1.15rem; }
+    .nav-link { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+    .hero-section { min-height: 380px; }
+    .game-title { font-size: 2.5rem; }
+    .game-page { padding: 0.5rem 0.8rem 1.2rem; }
+    .game-hud { gap: 0.5rem; padding: 0.5rem 0.8rem; }
+    .hud-value { font-size: 1.1rem; }
+    .overlay-icon { font-size: 2.5rem; }
+    .overlay-content h2 { font-size: 1.5rem; }
+    .game-controls { gap: 0.4rem; }
+    .game-controls .btn { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+    .difficulty-bar .diff-btn { font-size: 0.75rem; padding: 0.25rem 0.55rem; }
+    .touch-hint { display: block !important; }
+    .key-hint { display: none; }
     .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .top3-podium { gap: 0.5rem; }
+    .diff-buttons { gap: 0.4rem; }
+    .diff-btn { min-width: 70px; padding: 0.45rem 0.65rem; }
+    .diff-icon { font-size: 1.1rem; }
+    .diff-desc { display: none; }
+    .auth-card { padding: 1.5rem; }
 }
 
 /* ============================================================

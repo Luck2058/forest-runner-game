@@ -369,9 +369,130 @@ document.addEventListener('keyup', function(e) {
 });
 
 // ============================================================
+// Canvas 自适应（移动端画面适配）
+// ============================================================
+const DESIGN_W = 800;       // 设计宽度（内部坐标系）
+const DESIGN_H = 300;       // 设计高度
+const ASPECT   = DESIGN_H / DESIGN_W; // 高宽比 = 0.375
+
+/** 根据窗口大小动态调整 Canvas 显示尺寸 */
+function resizeCanvas() {
+    const wrap = document.querySelector('.canvas-wrap');
+    if (!wrap) return;
+
+    const maxWidth = Math.min(wrap.clientWidth, 800);
+    // 手机横屏时限制最大高度为视口50%
+    const maxHeight = window.innerHeight * 0.5;
+    const widthByHeight = maxHeight / ASPECT;
+
+    let displayWidth;
+    if (window.innerWidth <= 480) {
+        // 手机：尽量撑满宽度，但限制高度不超过50vh
+        displayWidth = Math.min(maxWidth, widthByHeight);
+    } else {
+        displayWidth = maxWidth;
+    }
+
+    canvas.style.width  = displayWidth + 'px';
+    canvas.style.height = (displayWidth * ASPECT) + 'px';
+}
+
+/** 检测是否为移动端/触屏设备 */
+function isTouchDevice() {
+    return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+}
+
+// 监听窗口大小变化 & 屏幕旋转
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', function() {
+    setTimeout(resizeCanvas, 200); // 等旋转完成再调整
+});
+
+// ============================================================
+// 移动端触屏手势（上滑跳跃、下滑俯身）
+// ============================================================
+let touchStartY = 0;
+let touchSlideActive = false;
+let touchJumped = false;
+
+canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (e.touches.length !== 1) return;  // 只处理单指手势
+    const touch = e.touches[0];
+    touchStartY = touch.clientY;
+    touchJumped = false;
+
+    if (gameState === 'idle') {
+        startGame();
+    } else if (gameState === 'over') {
+        return;  // 死亡后不响应触摸，防止误触
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (e.touches.length !== 1) return;
+    if (gameState !== 'running') return;
+
+    const touch = e.touches[0];
+    const deltaY = touchStartY - touch.clientY; // >0=上滑, <0=下滑
+
+    // 上滑 → 跳跃（每次触摸只触发一次）
+    if (deltaY > 40 && !touchJumped) {
+        jump();                  // ← player.js
+        touchJumped = true;
+        touchStartY = touch.clientY; // 重置基准，允许连续跳跃
+    }
+
+    // 下滑 → 俯身
+    if (deltaY < -30) {
+        if (!touchSlideActive) {
+            startSlide();        // ← player.js
+            touchSlideActive = true;
+        }
+    }
+    // 手指回滑则取消俯身
+    if (deltaY > -10 && touchSlideActive) {
+        endSlide();              // ← player.js
+        touchSlideActive = false;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    if (touchSlideActive) {
+        endSlide();              // ← player.js
+        touchSlideActive = false;
+    }
+    touchJumped = false;
+}, { passive: false });
+
+canvas.addEventListener('touchcancel', function(e) {
+    if (touchSlideActive) {
+        endSlide();
+        touchSlideActive = false;
+    }
+    touchJumped = false;
+});
+
+// ============================================================
 // 页面加载完毕后启动游戏
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
+    // 移动端 Canvas 自适应（先调整尺寸再渲染）
+    resizeCanvas();
+
+    // 移动端显示触屏提示，隐藏键盘提示
+    if (isTouchDevice()) {
+        const keyHints = document.querySelectorAll('.key-hint');
+        keyHints.forEach(el => el.style.display = 'none');
+        const touchHint = document.getElementById('touchHint');
+        if (touchHint) touchHint.style.display = '';
+        // 键盘操作指南也隐藏
+        const keyGuide = document.querySelector('.key-guide:not(.powerup-legend)');
+        if (keyGuide) keyGuide.style.display = 'none';
+    }
+
     // 【B岗】预加载素材图片
     SpriteLoader.loadAll().then(() => {
         console.log('[素材] 所有图片加载完成');
