@@ -23,6 +23,19 @@
         laneOffset: 0,
         jumpVelocity: 0,
         jumpHeight: 0,
+        player: {
+            lane: 1,
+            targetLane: 1,
+            x: 0,
+            y: 0,
+            baseY: 0,
+            jumpY: 0,
+            jumpHeight: 0,
+            vy: 0,
+            isJumping: false,
+            isGrounded: true,
+            hitbox: null
+        },
         landingSquash: 0,
         wasGrounded: true,
         slideTimer: 0,
@@ -43,6 +56,17 @@
     const LANES = [-1, 0, 1];
     const PLAYER_Z = 0.91;
     const MAX_ENERGY = 100;
+    const DEBUG_COLLISION = false;
+    const COLLISION_NEAR_Z = 0.84;
+    const COLLISION_FAR_Z = 1.02;
+    const OBSTACLE_RULES = {
+        stump: { type: 'stump', obstacleClass: 'groundLow', requiredJumpHeight: 0.14 },
+        stone: { type: 'rock', obstacleClass: 'groundLow', requiredJumpHeight: 0.16 },
+        rock: { type: 'rock', obstacleClass: 'groundLow', requiredJumpHeight: 0.16 },
+        crate: { type: 'crate', obstacleClass: 'groundHigh', requiredJumpHeight: 0.3 },
+        branch: { type: 'bird', obstacleClass: 'overhead', requiredJumpHeight: Infinity },
+        bird: { type: 'bird', obstacleClass: 'overhead', requiredJumpHeight: Infinity }
+    };
     const COLORS = {
         skyTop: '#8ed4f4',
         skyMid: '#d9f6ff',
@@ -131,6 +155,17 @@
         ForestRunner3D.laneOffset = 0;
         ForestRunner3D.jumpVelocity = 0;
         ForestRunner3D.jumpHeight = 0;
+        ForestRunner3D.player.lane = 1;
+        ForestRunner3D.player.targetLane = 1;
+        ForestRunner3D.player.x = 0;
+        ForestRunner3D.player.y = 0;
+        ForestRunner3D.player.baseY = 0;
+        ForestRunner3D.player.jumpY = 0;
+        ForestRunner3D.player.jumpHeight = 0;
+        ForestRunner3D.player.vy = 0;
+        ForestRunner3D.player.isJumping = false;
+        ForestRunner3D.player.isGrounded = true;
+        ForestRunner3D.player.hitbox = null;
         ForestRunner3D.landingSquash = 0;
         ForestRunner3D.wasGrounded = true;
         ForestRunner3D.slideTimer = 0;
@@ -167,6 +202,7 @@
         }
 
         updateHud('待开始');
+        syncPlayerState();
     }
 
     function horizonY() {
@@ -204,6 +240,63 @@
             laneSpread,
             roadCenter: centerX + cameraLean + roadCurve
         };
+    }
+
+    function syncPlayerState() {
+        const laneValue = LANES[ForestRunner3D.laneIndex] + ForestRunner3D.laneOffset;
+        const base = project(laneValue, PLAYER_Z, 0);
+        const lifted = project(laneValue, PLAYER_Z, ForestRunner3D.jumpHeight);
+        ForestRunner3D.player.lane = ForestRunner3D.laneIndex;
+        ForestRunner3D.player.targetLane = ForestRunner3D.targetLaneIndex;
+        ForestRunner3D.player.x = lifted.x;
+        ForestRunner3D.player.y = lifted.y;
+        ForestRunner3D.player.baseY = base.y;
+        ForestRunner3D.player.jumpY = base.y - lifted.y;
+        ForestRunner3D.player.jumpHeight = ForestRunner3D.jumpHeight;
+        ForestRunner3D.player.vy = ForestRunner3D.jumpVelocity;
+        ForestRunner3D.player.isJumping = ForestRunner3D.jumpHeight > 0 || ForestRunner3D.jumpVelocity > 0;
+        ForestRunner3D.player.isGrounded = ForestRunner3D.jumpHeight === 0;
+        ForestRunner3D.player.hitbox = getPlayerHitbox();
+    }
+
+    function getPlayerHitbox() {
+        const laneValue = LANES[ForestRunner3D.laneIndex] + ForestRunner3D.laneOffset;
+        const p = project(laneValue, PLAYER_Z, ForestRunner3D.jumpHeight);
+        const size = 54 * p.scale;
+        const sliding = ForestRunner3D.slideTimer > 0;
+        const width = size * (sliding ? 0.5 : 0.46);
+        const height = size * (sliding ? 0.38 : 0.66);
+        const y = sliding ? p.y - height * 0.55 : p.y - size * 0.84;
+        return {
+            x: p.x - width / 2,
+            y,
+            width,
+            height,
+            centerX: p.x,
+            centerY: y + height / 2
+        };
+    }
+
+    function getObstacleRule(obstacle) {
+        return OBSTACLE_RULES[obstacle.type] || OBSTACLE_RULES[obstacle.kind] || OBSTACLE_RULES.stump;
+    }
+
+    function getObstacleHitbox(obstacle) {
+        const rule = getObstacleRule(obstacle);
+        const lift = rule.obstacleClass === 'overhead' ? 0.34 : 0;
+        const p = project(LANES[obstacle.lane], obstacle.z, lift);
+        const scale = p.scale;
+        if (rule.type === 'crate') {
+            return { x: p.x - 26 * scale, y: p.y - 46 * scale, width: 52 * scale, height: 50 * scale };
+        }
+        if (rule.obstacleClass === 'overhead') {
+            return { x: p.x - 38 * scale, y: p.y - 28 * scale, width: 76 * scale, height: 24 * scale };
+        }
+        return { x: p.x - 22 * scale, y: p.y - 38 * scale, width: 44 * scale, height: 42 * scale };
+    }
+
+    function isObstacleInCollisionZone(obstacle) {
+        return obstacle.z >= COLLISION_NEAR_Z && obstacle.z <= COLLISION_FAR_Z;
     }
 
     function drawSky() {
@@ -491,13 +584,14 @@
     }
 
     function drawObstacle(obstacle) {
-        const p = project(LANES[obstacle.lane], obstacle.z, obstacle.kind === 'branch' ? 0.34 : 0);
+        const visualType = obstacle.kind || obstacle.type;
+        const p = project(LANES[obstacle.lane], obstacle.z, visualType === 'branch' || visualType === 'bird' ? 0.34 : 0);
         if (obstacle.z > 0.68) {
             drawDangerMarker(obstacle);
         }
-        if (obstacle.kind === 'branch') {
+        if (visualType === 'branch' || visualType === 'bird') {
             drawBranch(p, obstacle);
-        } else if (obstacle.kind === 'crate') {
+        } else if (visualType === 'crate') {
             drawCrate(p, obstacle);
         } else {
             drawRockOrStump(p, obstacle);
@@ -523,16 +617,17 @@
 
     function drawRockOrStump(p, obstacle) {
         const ctx = ForestRunner3D.ctx;
+        const visualType = obstacle.kind || obstacle.type;
         const w = 54 * p.scale;
-        const h = obstacle.kind === 'stone' ? 48 * p.scale : 62 * p.scale;
+        const h = visualType === 'stone' || visualType === 'rock' ? 48 * p.scale : 62 * p.scale;
         ctx.fillStyle = 'rgba(0,0,0,0.22)';
         ctx.beginPath();
         ctx.ellipse(p.x, p.y + h * 0.42, w * 0.7, h * 0.18, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = obstacle.kind === 'stone' ? '#68706c' : '#754626';
+        ctx.fillStyle = visualType === 'stone' || visualType === 'rock' ? '#68706c' : '#754626';
         roundRect(ctx, p.x - w / 2, p.y - h * 0.45, w, h, Math.max(4, 8 * p.scale));
         ctx.fill();
-        ctx.fillStyle = obstacle.kind === 'stone' ? '#9ca59e' : '#a36d3c';
+        ctx.fillStyle = visualType === 'stone' || visualType === 'rock' ? '#9ca59e' : '#a36d3c';
         ctx.fillRect(p.x - w * 0.26, p.y - h * 0.22, w * 0.52, h * 0.13);
     }
 
@@ -653,10 +748,14 @@
 
     function spawnObstacle() {
         const kinds = ['stump', 'stone', 'crate', 'branch'];
+        const kind = kinds[Math.floor(Math.random() * kinds.length)];
+        const rule = OBSTACLE_RULES[kind];
         ForestRunner3D.obstacles.push({
             lane: Math.floor(Math.random() * 3),
             z: 0.04,
-            kind: kinds[Math.floor(Math.random() * kinds.length)]
+            kind,
+            type: rule.type,
+            requiredJumpHeight: rule.requiredJumpHeight
         });
     }
 
@@ -743,6 +842,7 @@
         }
         ForestRunner3D.wasGrounded = grounded;
         ForestRunner3D.landingSquash = Math.max(0, ForestRunner3D.landingSquash - dt * 5.5);
+        syncPlayerState();
     }
 
     function updateDepthObjects(dt, boostFactor) {
@@ -817,27 +917,56 @@
 
     function checkCollision() {
         ForestRunner3D.obstacles.forEach((obstacle) => {
-            const sameLane = obstacle.lane === ForestRunner3D.laneIndex && Math.abs(ForestRunner3D.laneOffset) < 0.3;
-            const close = obstacle.z > 0.84 && obstacle.z < 1.02;
-            if (!sameLane || !close) {
-                return;
-            }
-            const jumping = ForestRunner3D.jumpHeight > 0.36;
-            const sliding = ForestRunner3D.slideTimer > 0;
-            const canAvoid = obstacle.kind === 'branch' ? sliding : jumping;
-            if (canAvoid) {
-                ForestRunner3D.score += 55;
-                return;
-            }
-            if (ForestRunner3D.shieldTimer > 0 || ForestRunner3D.boostTimer > 0) {
-                obstacle.z = 1.2;
-                ForestRunner3D.shieldTimer = Math.max(0, ForestRunner3D.shieldTimer - 1.5);
-                ForestRunner3D.shake = 0.7;
-                burst('#75d8ff', 20);
-                return;
-            }
-            endGame();
+            checkObstacleCollision(obstacle);
         });
+    }
+
+    function checkObstacleCollision(obstacle) {
+        if (obstacle.resolved || !isObstacleInCollisionZone(obstacle)) {
+            return false;
+        }
+
+        const sameLane = obstacle.lane === ForestRunner3D.player.lane && Math.abs(ForestRunner3D.laneOffset) < 0.36;
+        if (!sameLane) {
+            return false;
+        }
+
+        if (canAvoidObstacle(obstacle)) {
+            obstacle.resolved = true;
+            ForestRunner3D.score += 55;
+            addFloatingText('闪避', '#eaffdf');
+            return false;
+        }
+
+        if (ForestRunner3D.shieldTimer > 0 || ForestRunner3D.boostTimer > 0) {
+            obstacle.resolved = true;
+            obstacle.z = COLLISION_FAR_Z + 0.2;
+            ForestRunner3D.shieldTimer = Math.max(0, ForestRunner3D.shieldTimer - 1.5);
+            ForestRunner3D.shake = 0.7;
+            burst('#75d8ff', 20);
+            addFloatingText('护盾抵挡', '#75d8ff');
+            return false;
+        }
+
+        obstacle.resolved = true;
+        endGame();
+        return true;
+    }
+
+    function canAvoidObstacle(obstacle) {
+        const rule = getObstacleRule(obstacle);
+        if (rule.obstacleClass === 'overhead') {
+            return ForestRunner3D.slideTimer > 0;
+        }
+        if (rule.obstacleClass === 'groundLow') {
+            return canJumpOverObstacle(obstacle);
+        }
+        return false;
+    }
+
+    function canJumpOverObstacle(obstacle) {
+        const rule = getObstacleRule(obstacle);
+        return ForestRunner3D.player.jumpHeight >= rule.requiredJumpHeight;
     }
 
     function draw() {
@@ -859,6 +988,9 @@
         drawPlayer();
         drawParticles();
         drawFloatingTexts();
+        if (DEBUG_COLLISION) {
+            drawCollisionDebug();
+        }
         drawVignette();
         ctx.restore();
 
@@ -877,6 +1009,27 @@
         gradient.addColorStop(1, 'rgba(5, 27, 17, 0.32)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawCollisionDebug() {
+        const ctx = ForestRunner3D.ctx;
+        const playerBox = getPlayerHitbox();
+        ctx.save();
+        ctx.lineWidth = 2 * ForestRunner3D.ratio;
+        ctx.strokeStyle = 'rgba(80, 220, 255, 0.95)';
+        ctx.strokeRect(playerBox.x, playerBox.y, playerBox.width, playerBox.height);
+        ForestRunner3D.obstacles.forEach((obstacle) => {
+            const box = getObstacleHitbox(obstacle);
+            ctx.strokeStyle = isObstacleInCollisionZone(obstacle) ? 'rgba(255, 80, 70, 0.95)' : 'rgba(255, 220, 80, 0.65)';
+            ctx.strokeRect(box.x, box.y, box.width, box.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `${12 * ForestRunner3D.ratio}px Arial, sans-serif`;
+            ctx.fillText(`z:${obstacle.z.toFixed(2)}`, box.x, box.y - 6 * ForestRunner3D.ratio);
+        });
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `${14 * ForestRunner3D.ratio}px Arial, sans-serif`;
+        ctx.fillText(`jump:${ForestRunner3D.player.jumpHeight.toFixed(2)} grounded:${ForestRunner3D.player.isGrounded}`, 18 * ForestRunner3D.ratio, 30 * ForestRunner3D.ratio);
+        ctx.restore();
     }
 
     function roundRect(ctx, x, y, w, h, r) {
