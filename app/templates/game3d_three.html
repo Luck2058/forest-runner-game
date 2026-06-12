@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}森林酷跑 3D 实验版{% endblock %}
+
+{% block extra_css %}
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231f7a4b'/%3E%3Cpath d='M32 8 14 38h10L16 52h32l-8-14h10L32 8z' fill='%23eaffdf'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game3d_three.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="three-run-page" aria-label="森林酷跑 Three.js 真 3D 实验版">
+    <div class="three-run-shell">
+        <header class="three-run-header">
+            <div>
+                <p class="three-run-kicker">Three.js Experiment</p>
+                <h1>森林酷跑 3D 实验版</h1>
+                <p class="three-run-note">Three.js 实验版，不影响正式 2D 版本</p>
+            </div>
+            <div class="three-run-actions">
+                <a href="{{ url_for('game.game') }}">返回 2D 版本</a>
+                <a href="{{ url_for('main.game3d') }}">返回 2.5D 实验版</a>
+            </div>
+        </header>
+
+        <div class="three-run-hud" aria-live="polite">
+            <div><span>分数</span><strong id="threeScore">0</strong></div>
+            <div><span>距离</span><strong><b id="threeDistance">0</b>m</strong></div>
+            <div><span>金币</span><strong id="threeCoins">0</strong></div>
+            <div><span>速度</span><strong id="threeSpeed">1.0x</strong></div>
+        </div>
+
+        <div class="three-run-stage" id="threeStage">
+            <div id="threeWebglMount" class="three-run-mount" aria-label="Three.js 3D 跑酷画面"></div>
+
+            <div class="three-run-overlay" id="threeStartOverlay">
+                <div class="three-run-panel">
+                    <p class="three-run-panel-label">Prototype</p>
+                    <h2>冲进真正的 3D 森林赛道</h2>
+                    <p>控制小狐狸在三条车道之间穿梭，跳过低矮障碍，收集旋转金币。</p>
+                    <div class="three-run-keys">
+                        <span>← / → 切换车道</span>
+                        <span>空格 / ↑ 跳跃</span>
+                        <span>P 暂停</span>
+                    </div>
+                    <div class="three-run-panel-actions">
+                        <button type="button" id="threeStartBtn">开始游戏</button>
+                        <a href="{{ url_for('game.game') }}">返回 2D</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="three-run-overlay three-run-hidden" id="threePauseOverlay">
+                <div class="three-run-panel">
+                    <p class="three-run-panel-label">Paused</p>
+                    <h2>森林风声暂停了</h2>
+                    <p>按 P 或点击继续按钮回到赛道。</p>
+                    <div class="three-run-panel-actions">
+                        <button type="button" id="threeResumeBtn">继续游戏</button>
+                        <button type="button" id="threePauseRestartBtn">重新开始</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="three-run-overlay three-run-hidden" id="threeOverOverlay">
+                <div class="three-run-panel three-run-result">
+                    <p class="three-run-panel-label">Run Complete</p>
+                    <h2>本局分数 <span id="threeFinalScore">0</span></h2>
+                    <div class="three-run-result-grid">
+                        <div><span>距离</span><strong id="threeFinalDistance">0m</strong></div>
+                        <div><span>金币</span><strong id="threeFinalCoins">0</strong></div>
+                        <div><span>最高速度</span><strong id="threeFinalSpeed">1.0x</strong></div>
+                    </div>
+                    <p id="threeFinalNote">这是一轮 Three.js 真 3D 跑酷实验数据。</p>
+                    <div class="three-run-panel-actions">
+                        <button type="button" id="threeRestartBtn">重新开始</button>
+                        <a href="{{ url_for('game.game') }}">返回 2D</a>
+                        <a href="{{ url_for('main.game3d') }}">返回 2.5D</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="three-run-controls">
+            <button type="button" id="threePauseBtn" disabled>暂停</button>
+            <button type="button" id="threeResetBtn">重新开始</button>
+            <a href="{{ url_for('main.index') }}">返回首页</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+}
+</script>
+<script type="module" src="{{ url_for('static', filename='js/game3d_three.js') }}"></script>
+{% endblock %}

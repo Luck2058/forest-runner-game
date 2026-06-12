@@ -52,6 +52,11 @@ class TestBasicRoutes:
         response = client.get('/game3d')
         assert response.status_code == 200
 
+    def test_game3d_three_page(self, client):
+        """Three.js 真 3D 实验页应该返回 200"""
+        response = client.get('/game3d-three')
+        assert response.status_code == 200
+
     def test_rank_page(self, client):
         """排行榜页应该返回 200"""
         response = client.get('/score/rank')
