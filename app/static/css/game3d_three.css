@@ -146,9 +146,19 @@
     height: 100%;
 }
 
+.three-run-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+}
+
 .three-run-overlay {
     position: absolute;
     inset: 0;
+    z-index: 2;
     display: grid;
     place-items: center;
     padding: 1rem;

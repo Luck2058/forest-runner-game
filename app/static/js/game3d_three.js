@@ -22,6 +22,7 @@ import * as THREE from 'three';
         coinTimer: 0,
         shakeTimer: 0,
         flashTimer: 0,
+        flashColor: '255, 246, 190',
         trackSegments: [],
         trees: [],
         clouds: [],
@@ -77,6 +78,9 @@ import * as THREE from 'three';
         ForestRunnerThree.dom.finalCoins = document.getElementById('threeFinalCoins');
         ForestRunnerThree.dom.finalSpeed = document.getElementById('threeFinalSpeed');
         ForestRunnerThree.dom.finalNote = document.getElementById('threeFinalNote');
+        ForestRunnerThree.dom.flash = document.createElement('div');
+        ForestRunnerThree.dom.flash.className = 'three-run-flash';
+        ForestRunnerThree.dom.stage.appendChild(ForestRunnerThree.dom.flash);
 
         document.getElementById('threeStartBtn').addEventListener('click', startGame);
         document.getElementById('threeRestartBtn').addEventListener('click', restartGame);
@@ -439,6 +443,7 @@ import * as THREE from 'three';
         ForestRunnerThree.coinTimer = 0.7;
         ForestRunnerThree.shakeTimer = 0;
         ForestRunnerThree.flashTimer = 0;
+        ForestRunnerThree.flashColor = '255, 246, 190';
         clearObjects(ForestRunnerThree.obstacles);
         clearObjects(ForestRunnerThree.coinItems);
         clearObjects(ForestRunnerThree.particles);
@@ -503,7 +508,7 @@ import * as THREE from 'three';
         ForestRunnerThree.gameOver = true;
         ForestRunnerThree.running = false;
         ForestRunnerThree.shakeTimer = 0.42;
-        ForestRunnerThree.flashTimer = 0.35;
+        triggerScreenFlash('255, 86, 72', 0.4);
         ForestRunnerThree.dom.pauseBtn.disabled = true;
         ForestRunnerThree.dom.finalScore.textContent = Math.floor(ForestRunnerThree.score).toString();
         ForestRunnerThree.dom.finalDistance.textContent = `${Math.floor(ForestRunnerThree.distance)}m`;
@@ -707,6 +712,7 @@ import * as THREE from 'three';
             obstacle.userData.resolved = true;
             obstacle.userData.passed = true;
             ForestRunnerThree.shakeTimer = 0.25;
+            triggerScreenFlash('120, 216, 255', 0.28);
             spawnParticles(0x88ddff, obstacle.position, 14);
             debugCollision('shield', obstacle, playerState);
             return false;
@@ -714,6 +720,8 @@ import * as THREE from 'three';
 
         obstacle.userData.resolved = true;
         obstacle.userData.passed = true;
+        ForestRunnerThree.shakeTimer = 0.42;
+        triggerScreenFlash('255, 86, 72', 0.4);
         debugCollision('hit', obstacle, playerState);
         endGame();
         return true;
@@ -785,6 +793,7 @@ import * as THREE from 'three';
             coin.userData.collected = true;
             ForestRunnerThree.coins += 1;
             ForestRunnerThree.score += 35;
+            triggerScreenFlash('255, 212, 71', 0.16);
             spawnParticles(0xffd447, coin.position, 14);
         }
     }
@@ -811,6 +820,21 @@ import * as THREE from 'three';
         ForestRunnerThree.dom.distance.textContent = Math.floor(ForestRunnerThree.distance).toString();
         ForestRunnerThree.dom.coins.textContent = ForestRunnerThree.coins.toString();
         ForestRunnerThree.dom.speed.textContent = `${(ForestRunnerThree.speed / 18).toFixed(1)}x`;
+    }
+
+    function triggerScreenFlash(color, strength) {
+        ForestRunnerThree.flashColor = color;
+        ForestRunnerThree.flashTimer = Math.max(ForestRunnerThree.flashTimer, strength);
+        updateScreenFlash();
+    }
+
+    function updateScreenFlash() {
+        if (!ForestRunnerThree.dom.flash) {
+            return;
+        }
+        const opacity = Math.min(0.42, ForestRunnerThree.flashTimer);
+        ForestRunnerThree.dom.flash.style.background = `rgba(${ForestRunnerThree.flashColor}, ${opacity})`;
+        ForestRunnerThree.dom.flash.style.opacity = opacity > 0.01 ? '1' : '0';
     }
 
     function updateGame(dt) {
@@ -845,6 +869,7 @@ import * as THREE from 'three';
         const shake = ForestRunnerThree.shakeTimer > 0 ? ForestRunnerThree.shakeTimer * 0.18 : 0;
         ForestRunnerThree.shakeTimer = Math.max(0, ForestRunnerThree.shakeTimer - dt);
         ForestRunnerThree.flashTimer = Math.max(0, ForestRunnerThree.flashTimer - dt);
+        updateScreenFlash();
         camera.position.x += (baseX - camera.position.x) * Math.min(1, dt * 5);
         camera.position.y = 5.4 + Math.sin(performance.now() * 0.006) * shake;
         camera.position.z = 9.4 + Math.cos(performance.now() * 0.009) * shake;
@@ -883,6 +908,7 @@ import * as THREE from 'three';
         player.isGrounded = false;
         player.isJumping = true;
         spawnParticles(0xeaffdf, player.group.position, 8);
+        triggerScreenFlash('234, 255, 223', 0.1);
     }
 
     function bindKeys() {
