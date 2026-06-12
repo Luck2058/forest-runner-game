@@ -17,6 +17,7 @@ import * as THREE from 'three';
         coins: 0,
         speed: 18,
         maxSpeed: 34,
+        shieldTimer: 0,
         spawnTimer: 0,
         coinTimer: 0,
         shakeTimer: 0,
@@ -29,16 +30,20 @@ import * as THREE from 'three';
         particles: [],
         player: {
             group: null,
+            model: {},
             lane: 1,
             targetLane: 1,
             x: 0,
             y: 0,
+            groundY: 0.62,
             baseY: 0.62,
             jumpHeight: 0,
+            verticalVelocity: 0,
             vy: 0,
             isJumping: false,
             isGrounded: true,
-            runPhase: 0
+            runPhase: 0,
+            landingSquash: 0
         },
         dom: {}
     };
@@ -47,13 +52,13 @@ import * as THREE from 'three';
     const PLAYER_Z = 0;
     const SPAWN_Z = -86;
     const REMOVE_Z = 9;
-    const COLLISION_NEAR_Z = -1.15;
-    const COLLISION_FAR_Z = 1.15;
+    const COLLISION_Z_MIN = -0.78;
+    const COLLISION_Z_MAX = 0.95;
     const DEBUG_COLLISION = false;
     const OBSTACLE_TYPES = {
-        stump: { label: '树桩', jumpable: true, requiredJumpHeight: 1.05, radius: 0.62 },
-        rock: { label: '石头', jumpable: true, requiredJumpHeight: 1.15, radius: 0.7 },
-        crate: { label: '木箱', jumpable: false, requiredJumpHeight: 2.8, radius: 0.86 }
+        stump: { label: '树桩', height: 0.95, canJumpOver: true, requiredJumpHeight: 0.72, radius: 0.56, depth: 0.9 },
+        rock: { label: '石头', height: 0.82, canJumpOver: true, requiredJumpHeight: 0.82, radius: 0.62, depth: 0.88 },
+        crate: { label: '木箱', height: 1.55, canJumpOver: false, requiredJumpHeight: 2.8, radius: 0.82, depth: 1.04 }
     };
 
     function cacheDom() {
@@ -240,59 +245,111 @@ import * as THREE from 'three';
     }
 
     function createPlayer() {
-        const group = new THREE.Group();
-        const orange = new THREE.MeshStandardMaterial({ color: 0xd96f28, roughness: 0.65 });
-        const white = new THREE.MeshStandardMaterial({ color: 0xffead2, roughness: 0.7 });
-        const dark = new THREE.MeshStandardMaterial({ color: 0x3c2118, roughness: 0.75 });
+        const model = createPlayerModel();
+        model.group.position.set(0, ForestRunnerThree.player.groundY, PLAYER_Z);
+        model.group.rotation.y = Math.PI;
+        ForestRunnerThree.scene.add(model.group);
+        ForestRunnerThree.scene.add(model.shadow);
+        ForestRunnerThree.player.group = model.group;
+        ForestRunnerThree.player.model = model;
+    }
 
-        const body = new THREE.Mesh(new THREE.SphereGeometry(0.58, 18, 14), orange);
-        body.scale.set(0.82, 1.08, 0.64);
-        body.position.y = 0.82;
+    function createPlayerModel() {
+        const group = new THREE.Group();
+        const orange = new THREE.MeshStandardMaterial({ color: 0xd86b28, roughness: 0.72, flatShading: true });
+        const orangeDark = new THREE.MeshStandardMaterial({ color: 0xaa451d, roughness: 0.78, flatShading: true });
+        const white = new THREE.MeshStandardMaterial({ color: 0xffead2, roughness: 0.74, flatShading: true });
+        const dark = new THREE.MeshStandardMaterial({ color: 0x2d1a14, roughness: 0.8, flatShading: true });
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x17110d });
+        const model = { group, legs: [], ears: [] };
+
+        const body = new THREE.Mesh(new THREE.SphereGeometry(0.62, 12, 9), orange);
+        body.scale.set(0.86, 1.0, 0.7);
+        body.position.y = 0.9;
         body.castShadow = true;
         group.add(body);
+        model.body = body;
 
-        const belly = new THREE.Mesh(new THREE.SphereGeometry(0.34, 16, 10), white);
-        belly.scale.set(0.7, 0.9, 0.2);
-        belly.position.set(0, 0.76, 0.43);
+        const belly = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), white);
+        belly.scale.set(0.74, 0.95, 0.18);
+        belly.position.set(0, 0.86, 0.46);
         group.add(belly);
 
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.43, 18, 14), orange);
-        head.position.set(0, 1.48, 0.12);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 9), orange);
+        head.scale.set(1.02, 0.94, 0.9);
+        head.position.set(0, 1.48, 0.1);
         head.castShadow = true;
         group.add(head);
+        model.head = head;
 
         [-0.24, 0.24].forEach((x) => {
-            const ear = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.42, 4), orange);
-            ear.position.set(x, 1.92, 0.04);
-            ear.rotation.z = x < 0 ? 0.25 : -0.25;
+            const ear = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.48, 4), orangeDark);
+            ear.position.set(x, 1.9, 0.02);
+            ear.rotation.set(0.05, 0, x < 0 ? 0.28 : -0.28);
             ear.castShadow = true;
             group.add(ear);
+            model.ears.push(ear);
         });
 
-        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.1, 14), orange);
-        tail.position.set(-0.62, 0.8, -0.24);
-        tail.rotation.z = -1.15;
-        tail.rotation.x = 0.28;
+        const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), white);
+        muzzle.scale.set(0.9, 0.62, 0.58);
+        muzzle.position.set(0, 1.4, 0.48);
+        group.add(muzzle);
+
+        [-0.13, 0.13].forEach((x) => {
+            const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), eyeMat);
+            eye.position.set(x, 1.53, 0.48);
+            group.add(eye);
+        });
+
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), dark);
+        nose.position.set(0, 1.4, 0.6);
+        group.add(nose);
+
+        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.36, 1.45, 12), orange);
+        tail.position.set(-0.72, 0.95, -0.25);
+        tail.rotation.set(0.28, 0.15, -1.18);
         tail.castShadow = true;
         group.add(tail);
+        model.tail = tail;
 
-        const tailTip = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 8), white);
-        tailTip.position.set(-1.02, 1.03, -0.42);
+        const tailTip = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), white);
+        tailTip.scale.set(1.1, 0.82, 0.82);
+        tailTip.position.set(-1.24, 1.16, -0.47);
         group.add(tailTip);
+        model.tailTip = tailTip;
 
-        [-0.25, 0.25].forEach((x) => {
-            const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.58, 8), dark);
-            leg.position.set(x, 0.25, 0.12);
-            leg.castShadow = true;
+        [
+            [-0.28, 0.2, 1],
+            [0.28, 0.2, -1],
+            [-0.26, -0.2, -1],
+            [0.26, -0.2, 1]
+        ].forEach(([x, z, side]) => {
+            const leg = new THREE.Group();
+            const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.095, 0.44, 7), dark);
+            upper.position.y = 0.27;
+            upper.castShadow = true;
+            leg.add(upper);
+            const paw = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), dark);
+            paw.scale.set(0.95, 0.48, 1.28);
+            paw.position.set(0, 0.02, 0.05);
+            paw.castShadow = true;
+            leg.add(paw);
+            leg.position.set(x, 0.08, z);
+            leg.userData.side = side;
             group.add(leg);
-            leg.userData.isLeg = true;
-            leg.userData.side = x < 0 ? -1 : 1;
+            model.legs.push(leg);
         });
 
-        group.position.set(0, ForestRunnerThree.player.baseY, PLAYER_Z);
-        group.rotation.y = Math.PI;
-        ForestRunnerThree.scene.add(group);
-        ForestRunnerThree.player.group = group;
+        const shadow = new THREE.Mesh(
+            new THREE.CircleGeometry(0.78, 24),
+            new THREE.MeshBasicMaterial({ color: 0x14301f, transparent: true, opacity: 0.28, depthWrite: false })
+        );
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.set(0, 0.105, PLAYER_Z + 0.12);
+        model.shadow = shadow;
+
+        return model;
     }
 
     function createObstacle() {
@@ -346,6 +403,7 @@ import * as THREE from 'three';
             lane,
             type,
             resolved: false,
+            passed: false,
             ...OBSTACLE_TYPES[type]
         };
         ForestRunnerThree.scene.add(group);
@@ -376,6 +434,7 @@ import * as THREE from 'three';
         ForestRunnerThree.distance = 0;
         ForestRunnerThree.coins = 0;
         ForestRunnerThree.speed = 18;
+        ForestRunnerThree.shieldTimer = 0;
         ForestRunnerThree.spawnTimer = 0.45;
         ForestRunnerThree.coinTimer = 0.7;
         ForestRunnerThree.shakeTimer = 0;
@@ -388,11 +447,19 @@ import * as THREE from 'three';
         ForestRunnerThree.player.x = 0;
         ForestRunnerThree.player.y = 0;
         ForestRunnerThree.player.jumpHeight = 0;
+        ForestRunnerThree.player.verticalVelocity = 0;
         ForestRunnerThree.player.vy = 0;
         ForestRunnerThree.player.isGrounded = true;
         ForestRunnerThree.player.isJumping = false;
+        ForestRunnerThree.player.landingSquash = 0;
         if (ForestRunnerThree.player.group) {
-            ForestRunnerThree.player.group.position.set(0, ForestRunnerThree.player.baseY, PLAYER_Z);
+            ForestRunnerThree.player.group.position.set(0, ForestRunnerThree.player.groundY, PLAYER_Z);
+            ForestRunnerThree.player.group.scale.set(1, 1, 1);
+        }
+        if (ForestRunnerThree.player.model.shadow) {
+            ForestRunnerThree.player.model.shadow.position.set(0, 0.105, PLAYER_Z + 0.12);
+            ForestRunnerThree.player.model.shadow.scale.set(1, 0.72, 1);
+            ForestRunnerThree.player.model.shadow.material.opacity = 0.28;
         }
         ForestRunnerThree.dom.pauseBtn.disabled = true;
         ForestRunnerThree.dom.pauseBtn.textContent = '暂停';
@@ -447,6 +514,12 @@ import * as THREE from 'three';
     }
 
     function updatePlayer(dt) {
+        updateLaneSwitch(dt);
+        updatePlayerJump(dt);
+        updatePlayerAnimation(dt);
+    }
+
+    function updateLaneSwitch(dt) {
         const player = ForestRunnerThree.player;
         const targetX = LANES[player.targetLane];
         player.x += (targetX - player.x) * Math.min(1, dt * 12);
@@ -454,30 +527,79 @@ import * as THREE from 'three';
             player.x = targetX;
             player.lane = player.targetLane;
         }
+    }
 
-        if (player.jumpHeight > 0 || player.vy > 0) {
-            player.jumpHeight += player.vy * dt;
-            player.vy -= 19.5 * dt;
+    function updatePlayerJump(dt) {
+        const player = ForestRunnerThree.player;
+        if (player.jumpHeight > 0 || player.verticalVelocity > 0) {
+            const wasAirborne = !player.isGrounded;
+            player.jumpHeight += player.verticalVelocity * dt;
+            player.verticalVelocity -= 18.4 * dt;
             if (player.jumpHeight <= 0) {
                 player.jumpHeight = 0;
+                player.verticalVelocity = 0;
                 player.vy = 0;
                 player.isGrounded = true;
                 player.isJumping = false;
+                if (wasAirborne) {
+                    player.landingSquash = 1;
+                    spawnParticles(0xe8c58a, player.group.position, 6);
+                }
+            } else {
+                player.isGrounded = false;
+                player.isJumping = true;
+                player.vy = player.verticalVelocity;
             }
         }
+    }
 
-        player.runPhase += dt * ForestRunnerThree.speed * 0.92;
-        const bob = player.isGrounded ? Math.sin(player.runPhase) * 0.045 : 0;
-        player.y = player.baseY + player.jumpHeight + bob;
+    function updatePlayerAnimation(dt) {
+        const player = ForestRunnerThree.player;
+        const model = player.model || {};
+        const targetX = LANES[player.targetLane];
+        const moving = ForestRunnerThree.running && !ForestRunnerThree.paused && !ForestRunnerThree.gameOver;
+        if (moving && player.isGrounded) {
+            player.runPhase += dt * ForestRunnerThree.speed * 1.1;
+        }
+
+        player.landingSquash = Math.max(0, player.landingSquash - dt * 6);
+        const runWave = Math.sin(player.runPhase);
+        const bob = moving && player.isGrounded ? runWave * 0.055 : 0;
+        const squashY = 1 - player.landingSquash * 0.12;
+        const squashX = 1 + player.landingSquash * 0.08;
+        player.y = player.groundY + player.jumpHeight + bob;
         player.group.position.set(player.x, player.y, PLAYER_Z);
-        player.group.rotation.z = (targetX - player.x) * -0.08;
-        player.group.rotation.x = player.isJumping ? -0.12 + player.vy * 0.012 : 0;
+        player.group.scale.set(squashX, squashY, squashX);
+        player.group.rotation.z = (targetX - player.x) * -0.1;
+        player.group.rotation.x = player.isJumping ? -0.14 + player.verticalVelocity * 0.011 : 0;
 
-        player.group.children.forEach((child) => {
-            if (child.userData.isLeg) {
-                child.rotation.x = Math.sin(player.runPhase * 1.8) * 0.75 * child.userData.side;
-            }
+        if (model.body) {
+            model.body.rotation.z = moving ? runWave * 0.035 : 0;
+        }
+        if (model.head) {
+            model.head.rotation.x = player.isJumping ? -0.08 : Math.sin(player.runPhase + 0.6) * 0.035;
+        }
+        if (model.tail) {
+            model.tail.rotation.z = -1.18 + Math.sin(player.runPhase * 0.9) * 0.18;
+            model.tail.rotation.y = 0.15 + Math.cos(player.runPhase * 0.8) * 0.08;
+        }
+        if (model.tailTip) {
+            model.tailTip.position.y = 1.16 + Math.sin(player.runPhase * 0.9 + 0.4) * 0.08;
+        }
+        (model.ears || []).forEach((ear, index) => {
+            ear.rotation.x = 0.05 + Math.sin(player.runPhase * 0.7 + index) * 0.025;
         });
+        (model.legs || []).forEach((leg) => {
+            const swing = moving && player.isGrounded ? Math.sin(player.runPhase * 1.85) * 0.78 * leg.userData.side : 0;
+            leg.rotation.x = player.isJumping ? 0.28 * leg.userData.side : swing;
+        });
+        if (model.shadow) {
+            model.shadow.position.x = player.x;
+            model.shadow.position.z = PLAYER_Z + 0.12;
+            const shadowScale = Math.max(0.42, 1 - player.jumpHeight * 0.24);
+            model.shadow.scale.set(shadowScale, shadowScale * 0.72, shadowScale);
+            model.shadow.material.opacity = 0.28 * shadowScale;
+        }
     }
 
     function updateObstacles(dt) {
@@ -485,6 +607,9 @@ import * as THREE from 'three';
         ForestRunnerThree.obstacles.forEach((obstacle) => {
             obstacle.position.z += dz;
             obstacle.rotation.y += dt * 0.55;
+            if (obstacle.position.z > COLLISION_Z_MAX && !obstacle.userData.resolved) {
+                obstacle.userData.passed = true;
+            }
         });
         ForestRunnerThree.obstacles = ForestRunnerThree.obstacles.filter((obstacle) => {
             const keep = obstacle.position.z < REMOVE_Z;
@@ -561,29 +686,93 @@ import * as THREE from 'three';
     }
 
     function checkObstacleCollision(obstacle) {
-        if (obstacle.userData.resolved || !isObstacleInCollisionZone(obstacle)) {
+        const playerState = getPlayerCollisionState();
+        if (obstacle.userData.resolved || obstacle.userData.passed || !isObstacleNearPlayer(obstacle)) {
             return false;
         }
-        if (obstacle.userData.lane !== ForestRunnerThree.player.lane) {
+        if (obstacle.userData.lane !== playerState.lane) {
             return false;
         }
-        if (canJumpOverObstacle(obstacle)) {
+
+        if (canPlayerAvoidObstacle(obstacle, playerState)) {
             obstacle.userData.resolved = true;
             ForestRunnerThree.score += 45;
             spawnParticles(0xefffd7, ForestRunnerThree.player.group.position, 10);
+            debugCollision('avoid', obstacle, playerState);
             return false;
         }
+
+        if (ForestRunnerThree.shieldTimer > 0) {
+            ForestRunnerThree.shieldTimer = 0;
+            obstacle.userData.resolved = true;
+            obstacle.userData.passed = true;
+            ForestRunnerThree.shakeTimer = 0.25;
+            spawnParticles(0x88ddff, obstacle.position, 14);
+            debugCollision('shield', obstacle, playerState);
+            return false;
+        }
+
         obstacle.userData.resolved = true;
+        obstacle.userData.passed = true;
+        debugCollision('hit', obstacle, playerState);
         endGame();
         return true;
     }
 
-    function isObstacleInCollisionZone(obstacle) {
-        return obstacle.position.z >= COLLISION_NEAR_Z && obstacle.position.z <= COLLISION_FAR_Z;
+    function getPlayerCollisionState() {
+        const player = ForestRunnerThree.player;
+        return {
+            lane: player.lane,
+            targetLane: player.targetLane,
+            x: player.group ? player.group.position.x : player.x,
+            y: player.group ? player.group.position.y : player.groundY + player.jumpHeight,
+            z: PLAYER_Z,
+            groundY: player.groundY,
+            jumpHeight: player.jumpHeight,
+            verticalVelocity: player.verticalVelocity,
+            isJumping: player.isJumping,
+            isGrounded: player.isGrounded,
+            collisionRadiusX: 0.48,
+            collisionHeight: 1.2
+        };
     }
 
-    function canJumpOverObstacle(obstacle) {
-        return obstacle.userData.jumpable && ForestRunnerThree.player.jumpHeight >= obstacle.userData.requiredJumpHeight;
+    function isObstacleNearPlayer(obstacle) {
+        const z = obstacle.position.z - PLAYER_Z;
+        const near = z >= COLLISION_Z_MIN && z <= COLLISION_Z_MAX;
+        if (!near && z > COLLISION_Z_MAX) {
+            obstacle.userData.passed = true;
+        }
+        return near;
+    }
+
+    function canPlayerAvoidObstacle(obstacle, playerState) {
+        if (obstacle.userData.lane !== playerState.lane) {
+            return true;
+        }
+        if (obstacle.userData.canJumpOver) {
+            return playerState.jumpHeight >= obstacle.userData.requiredJumpHeight;
+        }
+        return false;
+    }
+
+    function debugCollision(result, obstacle, playerState) {
+        if (!DEBUG_COLLISION) {
+            return;
+        }
+        console.debug('[ForestRunnerThree collision]', {
+            result,
+            playerLane: playerState.lane,
+            playerJumpHeight: Number(playerState.jumpHeight.toFixed(2)),
+            playerY: Number(playerState.y.toFixed(2)),
+            obstacleLane: obstacle.userData.lane,
+            obstacleZ: Number(obstacle.position.z.toFixed(2)),
+            obstacleType: obstacle.userData.type,
+            inWindow: isObstacleNearPlayer(obstacle),
+            canJumpOver: obstacle.userData.canJumpOver,
+            requiredJumpHeight: obstacle.userData.requiredJumpHeight,
+            passed: obstacle.userData.passed
+        });
     }
 
     function checkCoinCollection(coin) {
@@ -591,7 +780,7 @@ import * as THREE from 'three';
             return;
         }
         const nearPlayer = coin.position.z > -1.2 && coin.position.z < 1.35;
-        const closeY = Math.abs((ForestRunnerThree.player.baseY + ForestRunnerThree.player.jumpHeight + 0.7) - coin.position.y) < 1.35;
+        const closeY = Math.abs((ForestRunnerThree.player.groundY + ForestRunnerThree.player.jumpHeight + 0.7) - coin.position.y) < 1.35;
         if (nearPlayer && closeY) {
             coin.userData.collected = true;
             ForestRunnerThree.coins += 1;
@@ -689,7 +878,8 @@ import * as THREE from 'three';
         if (!ForestRunnerThree.running || ForestRunnerThree.paused || ForestRunnerThree.gameOver || !player.isGrounded) {
             return;
         }
-        player.vy = 8.8;
+        player.verticalVelocity = 9.35;
+        player.vy = player.verticalVelocity;
         player.isGrounded = false;
         player.isJumping = true;
         spawnParticles(0xeaffdf, player.group.position, 8);
@@ -738,6 +928,16 @@ import * as THREE from 'three';
         resetGame();
         animate();
     }
+
+    Object.assign(ForestRunnerThree, {
+        getPlayerCollisionState,
+        isObstacleNearPlayer,
+        checkObstacleCollision,
+        canPlayerAvoidObstacle,
+        updateLaneSwitch,
+        updatePlayerJump,
+        updatePlayerAnimation
+    });
 
     document.addEventListener('DOMContentLoaded', init);
     window.ForestRunnerThree = ForestRunnerThree;
